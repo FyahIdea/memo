@@ -1,0 +1,166 @@
+/* QuickCaptureModal.module.css */
+
+/* ─── Object Type Picker ────────────────────────────────── */
+.typePicker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.typeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  transition: all var(--transition-fast);
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.typeBtn:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.typeBtn--active {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.typeIcon {
+  color: var(--color-text-muted);
+}
+
+.typeBtn--active .typeIcon {
+  color: var(--color-accent);
+}
+
+.typeBtn--active.typeBtn--quickNote .typeIcon { color: var(--color-warning); }
+.typeBtn--active.typeBtn--note .typeIcon      { color: var(--color-success); }
+.typeBtn--active.typeBtn--task .typeIcon      { color: var(--color-accent); }
+.typeBtn--active.typeBtn--event .typeIcon     { color: var(--color-danger); }
+
+
+/* ─── Form Area ─────────────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.fieldLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+}
+
+/* ─── Selectors (Boxes/Tags) ────────────────────────────── */
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  padding: 0.25em 0.75em;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chip:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-primary);
+}
+
+.chip--active {
+  background-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-color: transparent;
+}
+
+/* ─── Task Category Picker ──────────────────────────────── */
+.taskCatGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.taskCatBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-alt);
+  text-align: left;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.taskCatBtn:hover {
+  border-color: var(--color-text-muted);
+}
+
+.taskCatBtn--active {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+.taskCatName {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.taskCatBtn--active .taskCatName {
+  color: var(--color-accent);
+}
+
+.taskCatPoints {
+  font-family: var(--font-mono);
+  font-size: calc(var(--text-xs) * 0.9);
+  font-weight: var(--weight-bold);
+  color: var(--color-warning);
+  margin-top: var(--space-1);
+}
+
+/* ─── Inline Row ────────────────────────────────────────── */
+.inlineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-soft);
+  padding-bottom: var(--space-3);
+}
+
+.inlineLabel {
+  font-weight: var(--weight-bold);
+}

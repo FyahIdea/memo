@@ -1,5 +1,5 @@
 /**
- * Object-based Data Model for OmniLife Studio
+ * Object-based Data Model for Memo Studio
  * Predefined Object Types with fixed property schemas.
  */
 

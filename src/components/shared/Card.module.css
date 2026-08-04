@@ -1,0 +1,46 @@
+/* Card.module.css */
+/* Container nội dung — card, panel, section */
+
+/* ─── Base ───────────────────────────────────────────────── */
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* ─── Padding Variants ────────────────────────────────────── */
+.card--padSm { padding: var(--space-3); }
+.card--padMd { padding: var(--space-5); }   /* mặc định */
+.card--padLg { padding: var(--space-8); }
+.card--padNone { padding: 0; }
+
+/* ─── Radius Variants ─────────────────────────────────────── */
+.card--radiusMd  { border-radius: var(--radius-lg); }
+.card--radiusLg  { border-radius: var(--radius-xl); }
+.card--radiusXl  { border-radius: var(--radius-2xl); }  /* mặc định */
+
+/* ─── Style Variants ──────────────────────────────────────── */
+
+/* default — trắng có viền */
+.card--default { /* đã là base */ }
+
+/* elevated — shadow nhẹ */
+.card--elevated {
+  border-color: transparent;
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.06),
+    0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+/* ghost — trong suốt, chỉ có viền mờ */
+.card--ghost {
+  background-color: transparent;
+  border-color: var(--color-border-soft);
+}
+
+/* accent — viền và nền nhẹ màu accent */
+.card--accent {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+}

@@ -29,18 +29,18 @@ import {
 } from '../data/initialData';
 
 const STORAGE_KEYS = {
-  BOXES: 'omnilife_boxes',
-  TAGS: 'omnilife_tags',
-  EVENTS: 'omnilife_events',
-  TASKS: 'omnilife_tasks',
-  QUICK_NOTES: 'omnilife_quick_notes',
-  NOTES: 'omnilife_notes',
-  JARS: 'omnilife_jars',
-  SAVINGS_GOALS: 'omnilife_savings_goals',
-  BIG_PURCHASES: 'omnilife_big_purchases',
-  ONLINE_EXPENSES: 'omnilife_online_expenses',
-  REWARDS: 'omnilife_rewards',
-  GAMIFICATION: 'omnilife_gamification',
+  BOXES: 'memo_boxes',
+  TAGS: 'memo_tags',
+  EVENTS: 'memo_events',
+  TASKS: 'memo_tasks',
+  QUICK_NOTES: 'memo_quick_notes',
+  NOTES: 'memo_notes',
+  JARS: 'memo_jars',
+  SAVINGS_GOALS: 'memo_savings_goals',
+  BIG_PURCHASES: 'memo_big_purchases',
+  ONLINE_EXPENSES: 'memo_online_expenses',
+  REWARDS: 'memo_rewards',
+  GAMIFICATION: 'memo_gamification',
 };
 
 function safeGetItem<T>(key: string, defaultValue: T): T {

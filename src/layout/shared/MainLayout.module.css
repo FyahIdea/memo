@@ -1,0 +1,288 @@
+/* MainLayout.module.css */
+/* Shell layout: sidebar + main content + modals */
+
+/* ─── App root wrapper ────────────────────────────────────── */
+.app {
+  display: flex;
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ─── Main column (toàn bộ phần bên phải sidebar) ────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;   /* Ngăn flex item tràn */
+  overflow-y: auto;
+  padding-bottom: 4rem;   /* Chừa chỗ cho mobile bottom nav */
+}
+
+@media (min-width: 48em) {
+  .main {
+    padding-bottom: var(--space-6);
+  }
+}
+
+/* ─── Sticky header bar ───────────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
+  background-color: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3) var(--layout-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* ─── Header nhóm bên trái (streak, goal, points) ─────────── */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ─── Header nhóm bên phải (actions) ──────────────────────── */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ─── Badge stat (streak, goal, points) ──────────────────── */
+.statBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35em 0.75em;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-extrabold);
+  border: 1px solid;
+  cursor: pointer;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  background: none;
+  font-family: var(--font-sans);
+}
+
+.statBadge:hover {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+.statBadge--streak {
+  background-color: #FFF7ED;   /* orange-50 */
+  color: #EA580C;              /* orange-600 */
+  border-color: #FDBA74;       /* orange-300 */
+}
+
+.statBadge--goal {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent-border);
+}
+
+.statBadge--points {
+  background-color: #FFFBEB;   /* amber-50 */
+  color: #D97706;              /* amber-600 */
+  border-color: #FDE68A;       /* amber-200 */
+}
+
+.statBadgeNumber {
+  font-family: var(--font-mono);
+}
+
+.goalTitle {
+  display: none;
+}
+@media (min-width: 40em) {
+  .goalTitle {
+    display: inline;
+  }
+}
+
+/* ─── Header action button (Task Pool, Capture, Sound) ──── */
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.4em 0.875em;
+  border-radius: var(--radius-xl);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-extrabold);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.actionBtn:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.actionBtn:active {
+  transform: scale(0.97);
+}
+
+/* Task Pool button — active state */
+.actionBtn--poolActive {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Capture — primary style */
+.captureBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.4em 1em;
+  border-radius: var(--radius-xl);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-extrabold);
+  background-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.captureBtn:hover {
+  background-color: #2563EB;
+}
+
+.captureBtn:active {
+  transform: scale(0.97);
+}
+
+.captureKbd {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: rgb(255 255 255 / 0.2);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+/* Sound toggle button */
+.soundBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45em;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.soundBtn:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ─── Content area ─────────────────────────────────────────── */
+.content {
+  max-width: 75rem;   /* 1200px */
+  width: 100%;
+  margin-inline: auto;
+  padding: var(--layout-padding);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-gap);
+}
+
+/* ─── Footer ───────────────────────────────────────────────── */
+.footer {
+  max-width: 75rem;
+  width: 100%;
+  margin-inline: auto;
+  padding: var(--space-4) var(--layout-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border-soft);
+  margin-top: var(--space-8);
+}
+
+.footerBrand {
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.footerReset {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.footerReset:hover {
+  color: var(--color-text-primary);
+}
+
+/* ─── Streak modal ─────────────────────────────────────────── */
+.streakSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.streakCard {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+}
+
+.streakCard--fire {
+  background-color: #FFF7ED;
+  border: 1px solid #FDBA74;
+}
+
+.streakCard--points {
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+}
+
+.streakCardTitle {
+  font-size: var(--text-md);
+  font-weight: var(--weight-extrabold);
+  color: #EA580C;
+}
+
+.streakCardPoints {
+  color: #D97706;
+}
+
+.streakCardDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+  font-weight: var(--weight-semibold);
+}

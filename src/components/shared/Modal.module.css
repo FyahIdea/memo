@@ -1,0 +1,87 @@
+/* Modal.module.css */
+/* Overlay dialog — dùng làm base cho mọi modal trong app */
+
+/* ─── Overlay backdrop ────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--layout-padding);
+  background-color: rgb(15 23 42 / 0.4);   /* slate-900/40 */
+  backdrop-filter: blur(2px);
+  animation: overlayIn var(--transition-fast) ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Dialog panel ────────────────────────────────────────── */
+.dialog {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  width: 100%;
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: dialogIn var(--transition-normal) ease;
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─── Size variants ───────────────────────────────────────── */
+.dialog--sm { max-width: 24rem; }   /* 384px */
+.dialog--md { max-width: 32rem; }   /* 512px — mặc định */
+.dialog--lg { max-width: 48rem; }   /* 768px */
+
+/* ─── Header ──────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-soft);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ─── Body ────────────────────────────────────────────────── */
+.body {
+  padding: var(--space-5) var(--space-6);
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ─── Footer ──────────────────────────────────────────────── */
+.footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
