@@ -1,108 +1,186 @@
-/* Button.module.css */
-/* Nút bấm có variants, sizes và states */
-
-/* ─── Base ───────────────────────────────────────────────── */
-.button {
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: 0.5em 1em;
+  gap: 0.5em;
   border-radius: var(--radius-xl);
+  border: none;
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
-  white-space: nowrap;
-  border: 1px solid transparent;
   cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
-  user-select: none;
+  transition: all 0.12s ease-in-out;
+  line-height: 1;
 }
 
-.button:active {
-  transform: scale(0.97);
+/* === Sizes === */
+.sm {
+  padding: 0.5em 1em;
+  font-size: var(--text-small);
 }
 
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.md {
+  padding: 0.6em 1.5em;
+  font-size: var(--text-p);
 }
 
-/* ─── Variants ────────────────────────────────────────────── */
-
-/* Primary — nền accent đặc */
-.button--primary {
-  background-color: var(--color-accent);
-  color: var(--color-text-on-accent);
-  border-color: transparent;
+.lg {
+  padding: 0.75em 2em;
+  font-size: var(--text-h3);
 }
 
-.button--primary:hover:not(:disabled) {
-  background-color: #2563EB;  /* blue-600 */
+.iconOnly {
+  padding: 0.6em;
+  border-radius: var(--radius-full);
 }
 
-/* Secondary — nền surface có viền */
-.button--secondary {
-  background-color: var(--color-surface-alt);
+/* === Optical Alignment === */
+.opticalAlign.sm { margin-left: -1em; }
+.opticalAlign.md { margin-left: -1.5em; }
+.opticalAlign.lg { margin-left: -2em; }
+.opticalAlign.iconOnly { margin-left: -0.6em; }
+
+/* === Base Variants === */
+.primary {
+  color: white;
+}
+.primary:hover:not(:disabled) {
+  transform: translateY(0.1em);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(0.35em);
+}
+
+.outline {
+  background-color: var(--color-surface);
+  border: 2px solid;
+}
+.outline:hover:not(:disabled) {
+  transform: translateY(0.1em);
+}
+.outline:active:not(:disabled) {
+  transform: translateY(0.35em);
+}
+
+/* === Colors === */
+
+/* BLUE */
+.primary.blue {
+  background-color: var(--color-blue-primary);
+  box-shadow: 0 0.35em var(--color-blue-dark);
+}
+.primary.blue:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-blue-dark);
+}
+.primary.blue:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-blue-dark);
+}
+.outline.blue {
+  color: var(--color-blue-primary);
+  border-color: var(--color-blue-border);
+  box-shadow: 0 0.35em var(--color-blue-border);
+}
+.outline.blue:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-blue-border);
+}
+.outline.blue:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-blue-border);
+}
+
+/* GREEN */
+.primary.green {
+  background-color: var(--color-green-primary);
+  box-shadow: 0 0.35em var(--color-green-dark);
+}
+.primary.green:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-green-dark);
+}
+.primary.green:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-green-dark);
+}
+.outline.green {
+  color: var(--color-green-primary);
+  border-color: var(--color-green-border);
+  box-shadow: 0 0.35em var(--color-green-border);
+}
+.outline.green:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-green-border);
+}
+.outline.green:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-green-border);
+}
+
+/* RED */
+.primary.red {
+  background-color: var(--color-red-primary);
+  box-shadow: 0 0.35em var(--color-red-dark);
+}
+.primary.red:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-red-dark);
+}
+.primary.red:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-red-dark);
+}
+.outline.red {
+  color: var(--color-red-primary);
+  border-color: var(--color-red-border);
+  box-shadow: 0 0.35em var(--color-red-border);
+}
+.outline.red:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-red-border);
+}
+.outline.red:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-red-border);
+}
+
+/* YELLOW */
+.primary.yellow {
+  background-color: var(--color-yellow-primary);
+  color: white; /* Forced white text on yellow */
+  box-shadow: 0 0.35em var(--color-yellow-dark);
+}
+.primary.yellow:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-yellow-dark);
+}
+.primary.yellow:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-yellow-dark);
+}
+.outline.yellow {
+  color: var(--color-yellow-primary);
+  border-color: var(--color-yellow-border);
+  box-shadow: 0 0.35em var(--color-yellow-border);
+}
+.outline.yellow:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-yellow-border);
+}
+.outline.yellow:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-yellow-border);
+}
+
+/* NEUTRAL */
+.outline.neutral {
   color: var(--color-text-secondary);
-  border-color: var(--color-border);
+  border-color: var(--color-neutral-border);
+  box-shadow: 0 0.35em var(--color-neutral-border);
+}
+.outline.neutral:hover:not(:disabled) {
+  box-shadow: 0 0.25em var(--color-neutral-border);
+}
+.outline.neutral:active:not(:disabled) {
+  box-shadow: 0 0 var(--color-neutral-border);
 }
 
-.button--secondary:hover:not(:disabled) {
-  background-color: var(--color-border);
-  color: var(--color-text-primary);
-}
-
-/* Ghost — trong suốt */
-.button--ghost {
-  background-color: transparent;
+/* === Disabled State === */
+.btn:disabled {
+  transform: translateY(0.35em);
+  border: 0;
+  background-color: var(--color-neutral-border);
+  box-shadow: 0 0 var(--color-text-secondary);
   color: var(--color-text-secondary);
-  border-color: transparent;
+  cursor: default;
 }
 
-.button--ghost:hover:not(:disabled) {
-  background-color: var(--color-surface-alt);
-  color: var(--color-text-primary);
-}
-
-/* Danger — đỏ */
-.button--danger {
-  background-color: var(--color-danger-soft);
-  color: var(--color-danger);
-  border-color: var(--color-danger-border);
-}
-
-.button--danger:hover:not(:disabled) {
-  background-color: var(--color-danger);
-  color: var(--color-text-on-accent);
-}
-
-/* ─── Sizes ───────────────────────────────────────────────── */
-.button--sm {
-  padding: 0.3em 0.75em;
-  font-size: var(--text-xs);
-  border-radius: var(--radius-lg);
-}
-
-.button--md {
-  /* mặc định */
-}
-
-.button--lg {
-  padding: 0.65em 1.25em;
-  font-size: var(--text-base);
-  border-radius: var(--radius-xl);
-}
-
-/* ─── Icon only (nút vuông/tròn chỉ có icon) ─────────────── */
-.button--icon {
-  padding: 0.45em;
-  border-radius: var(--radius-lg);
+/* === Icon Wrapper === */
+.iconWrapper {
+  display: flex;
+  align-items: center;
 }

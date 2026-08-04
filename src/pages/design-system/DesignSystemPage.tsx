@@ -12,41 +12,57 @@ const DesignSystemPage: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
 
   const colors = [
-    { name: 'Background', var: 'var(--color-bg)' },
-    { name: 'Surface', var: 'var(--color-surface)' },
-    { name: 'Border', var: 'var(--color-border)' },
-    { name: 'Primary Text', var: 'var(--color-text-primary)' },
-    { name: 'Secondary Text', var: 'var(--color-text-secondary)' },
-    { name: 'Accent', var: 'var(--color-accent)' },
-    { name: 'Accent Soft', var: 'var(--color-accent-soft)' },
-    { name: 'Success', var: 'var(--color-success)' },
-    { name: 'Warning', var: 'var(--color-warning)' },
-    { name: 'Danger', var: 'var(--color-danger)' },
+    { name: 'Red Dark', var: 'var(--color-red-dark)' },
+    { name: 'Red Primary', var: 'var(--color-red-primary)' },
+    { name: 'Red Secondary', var: 'var(--color-red-secondary)' },
+    { name: 'Red Border', var: 'var(--color-red-border)' },
+    { name: 'Red BG', var: 'var(--color-red-bg)' },
+    
+    { name: 'Blue Dark', var: 'var(--color-blue-dark)' },
+    { name: 'Blue Primary', var: 'var(--color-blue-primary)' },
+    { name: 'Blue Secondary', var: 'var(--color-blue-secondary)' },
+    { name: 'Blue Border', var: 'var(--color-blue-border)' },
+    { name: 'Blue BG', var: 'var(--color-blue-bg)' },
+    
+    { name: 'Green Dark', var: 'var(--color-green-dark)' },
+    { name: 'Green Primary', var: 'var(--color-green-primary)' },
+    { name: 'Green Secondary', var: 'var(--color-green-secondary)' },
+    { name: 'Green Border', var: 'var(--color-green-border)' },
+    { name: 'Green BG', var: 'var(--color-green-bg)' },
+    
+    { name: 'Yellow Dark', var: 'var(--color-yellow-dark)' },
+    { name: 'Yellow Primary', var: 'var(--color-yellow-primary)' },
+    { name: 'Yellow Secondary', var: 'var(--color-yellow-secondary)' },
+    { name: 'Yellow Border', var: 'var(--color-yellow-border)' },
+    { name: 'Yellow BG', var: 'var(--color-yellow-bg)' },
+    
+    { name: 'Neutral Dark', var: 'var(--color-neutral-dark)' },
+    { name: 'Neutral Primary', var: 'var(--color-neutral-primary)' },
+    { name: 'Neutral Secondary', var: 'var(--color-neutral-secondary)' },
+    { name: 'Neutral Border', var: 'var(--color-neutral-border)' },
+    { name: 'Neutral BG', var: 'var(--color-neutral-bg)' },
   ];
 
   const typography = [
-    { size: 'var(--text-3xl)', label: 'text-3xl' },
-    { size: 'var(--text-2xl)', label: 'text-2xl' },
-    { size: 'var(--text-xl)', label: 'text-xl' },
-    { size: 'var(--text-lg)', label: 'text-lg' },
-    { size: 'var(--text-md)', label: 'text-md' },
-    { size: 'var(--text-base)', label: 'text-base' },
-    { size: 'var(--text-sm)', label: 'text-sm' },
-    { size: 'var(--text-xs)', label: 'text-xs' },
+    { size: 'var(--text-h1)', label: 'h1' },
+    { size: 'var(--text-h2)', label: 'h2' },
+    { size: 'var(--text-h3)', label: 'h3' },
+    { size: 'var(--text-p)', label: 'p' },
+    { size: 'var(--text-small)', label: 'small' },
   ];
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Design System Showcase</h1>
-        <p className={styles.subtitle}>
+        <h1 className={styles.title} style={{ fontSize: 'var(--text-h1)' }}>Design System Showcase</h1>
+        <p className={styles.subtitle} style={{ fontSize: 'var(--text-p)' }}>
           Tổng hợp các Component dùng chung và Design Tokens (Colors, Typography, Spacing).
         </p>
       </div>
 
       {/* Colors Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Colors & Tokens</h2>
+        <h2 className={styles.sectionTitle} style={{ fontSize: 'var(--text-h2)' }}>Colors & Tokens (Google Palette)</h2>
         <div className={styles.grid}>
           {colors.map((color) => (
             <div key={color.name} className={styles.colorCard}>
@@ -65,12 +81,15 @@ const DesignSystemPage: React.FC = () => {
 
       {/* Typography Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Typography</h2>
+        <h2 className={styles.sectionTitle} style={{ fontSize: 'var(--text-h2)' }}>Typography</h2>
         <div className={styles.section}>
           {typography.map((type) => (
             <div key={type.label} className={styles.fontRow}>
               <span className={styles.fontLabel}>{type.label}</span>
-              <span style={{ fontSize: type.size, fontWeight: 'var(--weight-semibold)' }}>
+              <span style={{ 
+                fontSize: type.size, 
+                fontWeight: ['h1', 'h2', 'h3'].includes(type.label) ? 'var(--weight-bold)' : 'var(--weight-regular)' 
+              }}>
                 The quick brown fox jumps over the lazy dog.
               </span>
             </div>
@@ -78,28 +97,61 @@ const DesignSystemPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Font Weights Showcase Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle} style={{ fontSize: 'var(--text-h2)' }}>Font Weights (One Source of Truth)</h2>
+        <div className={styles.flexRow} style={{ gap: 'var(--space-6)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--text-small)', color: 'var(--color-text-secondary)' }}>var(--weight-regular) / 400</span>
+            <span style={{ fontSize: 'var(--text-h2)', fontWeight: 'var(--weight-regular)' }}>Regular Text</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--text-small)', color: 'var(--color-text-secondary)' }}>var(--weight-bold) / 800</span>
+            <span style={{ fontSize: 'var(--text-h2)', fontWeight: 'var(--weight-bold)' }}>Bold Title</span>
+          </div>
+        </div>
+      </section>
+
       {/* Buttons Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Buttons</h2>
+        <h2 className={styles.sectionTitle} style={{ fontSize: 'var(--text-h2)' }}>Buttons (3D Solid Shadow)</h2>
+        
+        {/* Colors */}
         <div className={styles.flexRow}>
-          <Button variant="primary">Primary</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="danger">Danger</Button>
-          <Button variant="ghost">Ghost</Button>
+          <Button color="blue" label="Blue" />
+          <Button color="green" label="Green" />
+          <Button color="red" label="Red" />
+          <Button color="yellow" label="Yellow" />
+          <Button color="neutral" variant="outline" label="Grey Outline" />
         </div>
+
+        {/* Variants */}
         <div className={styles.flexRow}>
-          <Button variant="primary" size="sm">Small</Button>
-          <Button variant="primary" size="md">Medium</Button>
-          <Button variant="primary" size="lg">Large</Button>
+          <Button color="blue" variant="primary" label="Primary" />
+          <Button color="blue" variant="outline" label="Outline" />
         </div>
+        
+        {/* Sizes */}
         <div className={styles.flexRow}>
-          <Button variant="primary" disabled>Disabled</Button>
-          <Button variant="secondary" disabled>Disabled</Button>
-          <Button variant="primary" loading>Loading</Button>
+          <Button color="green" size="sm" label="Small" />
+          <Button color="green" size="md" label="Medium" />
+          <Button color="green" size="lg" label="Large" />
         </div>
+
+        {/* State */}
         <div className={styles.flexRow}>
-          <Button variant="secondary" icon={<Icon name="add" size="sm" />}>With Icon</Button>
-          <Button variant="primary" icon={<Icon name="arrow_forward" size="sm" />} iconPosition="right">Icon Right</Button>
+          <Button color="red" disabled label="Disabled" />
+          <Button color="red" variant="outline" disabled label="Disabled" />
+        </div>
+
+        {/* Icons */}
+        <div className={styles.flexRow}>
+          <Button color="blue" variant="primary" icon="add" label="Solid Icon" />
+          <Button color="green" variant="primary" icon="check" iconPosition="right" label="Solid Right" />
+          <Button color="neutral" variant="outline" icon="add" label="Outline Icon" />
+          <Button color="neutral" variant="outline" icon="arrow_forward" iconPosition="right" label="Outline Right" />
+          <Button color="neutral" variant="outline" icon="close" iconOnly />
+          <Button color="red" variant="primary" icon="delete" iconOnly />
         </div>
       </section>
 
@@ -112,7 +164,6 @@ const DesignSystemPage: React.FC = () => {
           <Badge variant="success">Success</Badge>
           <Badge variant="warning">Warning</Badge>
           <Badge variant="danger">Danger</Badge>
-          <Badge variant="ghost">Ghost</Badge>
         </div>
       </section>
 
@@ -132,9 +183,10 @@ const DesignSystemPage: React.FC = () => {
             error="This field is required"
           />
           <InputField 
-            label="With Icon" 
+            label="With Icons" 
             placeholder="Search..." 
-            // InputField trong project Memo chưa hỗ trợ prop icon trực tiếp, nên ta bỏ qua prop icon
+            leftIcon="search"
+            rightIcon="mic"
           />
         </div>
       </section>
@@ -184,7 +236,7 @@ const DesignSystemPage: React.FC = () => {
         title="Design System Modal"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button variant="primary" onClick={() => setIsModalOpen(false)}>Confirm</Button>
           </>
         }

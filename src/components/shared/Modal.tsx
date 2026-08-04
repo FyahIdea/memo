@@ -61,7 +61,7 @@ export const Modal: React.FC<ModalProps> = ({
         {title && (
           <div className={styles.header}>
             <span className={styles.title}>{title}</span>
-            <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label="Đóng">
+            <Button color="neutral" variant="outline" size="sm" iconOnly onClick={onClose} aria-label="Đóng">
               <Icon name="close" size="sm" />
             </Button>
           </div>

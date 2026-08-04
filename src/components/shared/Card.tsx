@@ -12,6 +12,7 @@ interface CardProps {
   radius?: CardRadius;
   children: React.ReactNode;
   className?: string;
+  opticalAlign?: boolean;
   onClick?: () => void;
 }
 
@@ -28,6 +29,7 @@ export const Card: React.FC<CardProps> = ({
   radius = 'xl',
   children,
   className,
+  opticalAlign = false,
   onClick,
 }) => {
   const padClass = `card--pad${padding.charAt(0).toUpperCase() + padding.slice(1)}`;
@@ -40,6 +42,7 @@ export const Card: React.FC<CardProps> = ({
         styles[`card--${variant}`],
         styles[padClass],
         styles[radiusClass],
+        opticalAlign && styles.opticalAlign,
         className,
       )}
       onClick={onClick}

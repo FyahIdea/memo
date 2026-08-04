@@ -269,7 +269,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <div className={styles.cardFooter}>
                     <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>Target Date: {goal.targetDate || 'Flexible'}</span>
                     <Button
-                      variant="ghost"
+                      color="neutral"
+                      variant="outline"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -312,7 +313,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Icon key={i} name={i < bp.rating ? 'star' : 'star_border'} size="sm" style={i < bp.rating ? {} : { color: 'var(--color-text-muted)' }} />
                   ))}
-                  <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-text-secondary)', marginLeft: '0.25rem' }}>{bp.rating}/5</span>
+                  <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-bold)', color: 'var(--color-text-secondary)', marginLeft: '0.25rem' }}>{bp.rating}/5</span>
                 </div>
 
                 {bp.notes && (
@@ -429,7 +430,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
         title="Add Funds to Savings Goal"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setDepositGoalId(null)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setDepositGoalId(null)}>Cancel</Button>
             <Button variant="primary" onClick={handleDepositSubmit} style={{ backgroundColor: 'var(--color-success)' }}>Deposit</Button>
           </>
         }
@@ -449,7 +450,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
         title="Record Big Purchase"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowPurchaseModal(false)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setShowPurchaseModal(false)}>Cancel</Button>
             <Button variant="primary" onClick={handlePurchaseSubmit} style={{ backgroundColor: 'var(--color-success)' }}>Save Purchase</Button>
           </>
         }
@@ -477,7 +478,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
         title="Add Online Service Expense"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowExpenseModal(false)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setShowExpenseModal(false)}>Cancel</Button>
             <Button variant="primary" onClick={handleExpenseSubmit} style={{ backgroundColor: 'var(--color-success)' }}>Save Service</Button>
           </>
         }
@@ -508,7 +509,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
         title="New Savings Goal"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowGoalModal(false)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setShowGoalModal(false)}>Cancel</Button>
             <Button variant="primary" onClick={handleGoalSubmit} style={{ backgroundColor: 'var(--color-success)' }}>Save Goal</Button>
           </>
         }

@@ -89,7 +89,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               <span className={clsx(styles.colDot, styles['colDot--small'])} />
               <span>Small / Misc Tasks</span>
             </div>
-            <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-success)' }}>
+            <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-bold)', color: 'var(--color-success)' }}>
               +5 pts
             </span>
           </div>
@@ -115,7 +115,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               >
                 <div className={styles.taskItemTop}>
                   <span className={styles.taskItemTitle}>{t.title}</span>
-                  <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-success)', fontWeight: 'var(--weight-semibold)', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-success)', fontWeight: 'var(--weight-bold)', flexShrink: 0 }}>
                     +5 pts
                   </span>
                 </div>
@@ -140,7 +140,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               <span className={clsx(styles.colDot, styles['colDot--short'])} />
               <span>Short-Term Focus</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-accent)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-bold)', color: 'var(--color-accent)' }}>
               <Icon name="push_pin" size="sm" style={{ color: 'var(--color-warning)' }} />
               <span>Pinned ({pinnedShortTermCount}/5 max)</span>
             </div>
@@ -189,7 +189,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   )}
 
                   <div className={styles.taskItemMeta} style={{ paddingTop: 'var(--space-2)', borderTop: '1px solid var(--color-border-soft)' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontWeight: 'var(--weight-semibold)' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontWeight: 'var(--weight-bold)' }}>
                       +{t.points} pts
                     </span>
                     {t.deadline && <span>Due {t.deadline}</span>}
@@ -207,7 +207,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               <span className={clsx(styles.colDot, styles['colDot--long'])} />
               <span>Long-Term Vision</span>
             </div>
-            <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-warning)' }}>
+            <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-bold)', color: 'var(--color-warning)' }}>
               +50 pts
             </span>
           </div>
@@ -233,7 +233,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               >
                 <div className={styles.taskItemTop}>
                   <span className={styles.taskItemTitle}>{t.title}</span>
-                  <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-warning)', fontWeight: 'var(--weight-semibold)', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-warning)', fontWeight: 'var(--weight-bold)', flexShrink: 0 }}>
                     +50 pts
                   </span>
                 </div>
@@ -253,7 +253,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
         title={`Add New ${activeCategoryModal === 'small' ? 'Small Task' : activeCategoryModal === 'short_term' ? 'Short-Term Task' : 'Long-Term Task'}`}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setActiveCategoryModal(null)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setActiveCategoryModal(null)}>Cancel</Button>
             <Button variant="primary" onClick={handleCreateSubmit}>Create Task</Button>
           </>
         }

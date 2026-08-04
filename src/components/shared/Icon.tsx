@@ -10,7 +10,7 @@ interface IconProps {
   name: string;
   /** Kích cỡ: sm=18px, md=24px (mặc định), lg=32px, xl=40px */
   size?: IconSize;
-  /** Bật biến thể filled (icon được tô màu) */
+  /** Bật biến thể filled (icon được tô màu). Mặc định là true theo ý thích user. */
   filled?: boolean;
   /** Class bổ sung nếu cần override */
   className?: string;
@@ -27,7 +27,7 @@ interface IconProps {
 export const Icon: React.FC<IconProps> = ({
   name,
   size = 'md',
-  filled = false,
+  filled = true,
   className,
 }) => {
   return (
@@ -35,12 +35,9 @@ export const Icon: React.FC<IconProps> = ({
       className={clsx(
         styles.icon,
         styles[`icon--${size}`],
+        !filled && styles['icon--outline'],
         className,
       )}
-      style={{
-        // Điều chỉnh FILL axis của variable font để chuyển giữa outline và filled
-        fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-      }}
       aria-hidden="true"
     >
       {name}

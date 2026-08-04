@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './Input.module.css';
+import { Icon } from './Icon';
 
 // ─── InputField ──────────────────────────────────────────────
 
@@ -8,6 +9,9 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   helperText?: string;
   error?: string;
+  leftIcon?: string;
+  rightIcon?: string;
+  opticalAlign?: boolean;
 }
 
 /**
@@ -21,6 +25,9 @@ export const InputField: React.FC<InputProps> = ({
   label,
   helperText,
   error,
+  leftIcon,
+  rightIcon,
+  opticalAlign = false,
   id,
   className,
   ...props
@@ -34,11 +41,29 @@ export const InputField: React.FC<InputProps> = ({
           {label}
         </label>
       )}
-      <input
-        id={inputId}
-        className={clsx(styles.input, error && styles['input--error'], className)}
-        {...props}
-      />
+      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+        {leftIcon && (
+          <span className={clsx(styles.icon, styles.iconLeft)}>
+            <Icon name={leftIcon} size="md" />
+          </span>
+        )}
+        <input
+          id={inputId}
+          className={clsx(
+            styles.input,
+            error && styles['input--error'],
+            leftIcon && styles.hasLeftIcon,
+            rightIcon && styles.hasRightIcon,
+            className
+          )}
+          {...props}
+        />
+        {rightIcon && (
+          <span className={clsx(styles.icon, styles.iconRight)}>
+            <Icon name={rightIcon} size="md" />
+          </span>
+        )}
+      </div>
       {(helperText || error) && (
         <span className={clsx(styles.helper, error && styles.helperError)}>
           {error || helperText}
@@ -54,12 +79,14 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   label?: string;
   helperText?: string;
   error?: string;
+  opticalAlign?: boolean;
 }
 
 export const TextareaField: React.FC<TextareaProps> = ({
   label,
   helperText,
   error,
+  opticalAlign = false,
   id,
   className,
   ...props
@@ -73,11 +100,13 @@ export const TextareaField: React.FC<TextareaProps> = ({
           {label}
         </label>
       )}
-      <textarea
-        id={inputId}
-        className={clsx(styles.input, styles.textarea, error && styles['input--error'], className)}
-        {...props}
-      />
+      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+        <textarea
+          id={inputId}
+          className={clsx(styles.input, styles.textarea, error && styles['input--error'], className)}
+          {...props}
+        />
+      </div>
       {(helperText || error) && (
         <span className={clsx(styles.helper, error && styles.helperError)}>
           {error || helperText}
@@ -93,6 +122,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   helperText?: string;
   error?: string;
+  opticalAlign?: boolean;
   children: React.ReactNode;
 }
 
@@ -100,6 +130,7 @@ export const SelectField: React.FC<SelectProps> = ({
   label,
   helperText,
   error,
+  opticalAlign = false,
   id,
   children,
   className,
@@ -114,13 +145,15 @@ export const SelectField: React.FC<SelectProps> = ({
           {label}
         </label>
       )}
-      <select
-        id={inputId}
-        className={clsx(styles.input, styles.select, error && styles['input--error'], className)}
-        {...props}
-      >
-        {children}
-      </select>
+      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+        <select
+          id={inputId}
+          className={clsx(styles.input, styles.select, error && styles['input--error'], className)}
+          {...props}
+        >
+          {children}
+        </select>
+      </div>
       {(helperText || error) && (
         <span className={clsx(styles.helper, error && styles.helperError)}>
           {error || helperText}

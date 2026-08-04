@@ -11,27 +11,61 @@
 /* ─── Label ───────────────────────────────────────────────── */
 .label {
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-secondary);
   line-height: var(--leading-tight);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* === Optical Alignment === */
+.opticalAlign.inputWrapper {
+  margin-left: -0.75em;
 }
 
 /* ─── Base input styles ───────────────────────────────────── */
 .input {
   width: 100%;
-  padding: 0.5em 0.75em;
+  padding: 0.6em 0.75em;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
+  font-size: var(--text-p);
   line-height: var(--leading-normal);
   outline: none;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast);
   appearance: none;
+}
+
+/* ─── Icon Modifiers ──────────────────────────────────────── */
+.icon {
+  position: absolute;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Let clicks pass through to input */
+}
+
+.iconLeft {
+  left: 0.75em;
+}
+.iconRight {
+  right: 0.75em;
+}
+
+.input.hasLeftIcon {
+  padding-left: 2.75em;
+}
+.input.hasRightIcon {
+  padding-right: 2.75em;
 }
 
 .input::placeholder {
@@ -39,8 +73,7 @@
 }
 
 .input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-accent-soft);
+  border-color: var(--color-blue-primary);
 }
 
 .input:disabled {
@@ -55,7 +88,7 @@
 }
 
 .input--error:focus {
-  box-shadow: 0 0 0 2px var(--color-danger-soft);
+  /* Chỉ giữ viền đỏ, bỏ box-shadow mờ */
 }
 
 /* ─── Textarea ────────────────────────────────────────────── */

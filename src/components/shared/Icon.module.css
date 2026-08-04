@@ -19,8 +19,16 @@
   user-select: none;
   flex-shrink: 0;
 
+  /* Default Google Material Symbols: FILL 1 */
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  
   /* Cho phép animation FILL transition */
   transition: font-variation-settings var(--transition-fast);
+}
+
+/* Biến thể outline nếu cần */
+.icon--outline {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 /* ─── Size variants ───────────────────────────────────────── */

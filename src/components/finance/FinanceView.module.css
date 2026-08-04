@@ -66,7 +66,7 @@
 .pointsBadgeLabel {
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-accent);
   text-transform: uppercase;
 }
@@ -94,7 +94,7 @@
   padding: 0.4em 0.75em;
   border-radius: var(--radius-lg);
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-secondary);
   background: none;
   border: none;
@@ -339,7 +339,7 @@
 .rewardCost {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-accent);
   margin-top: 0.1rem;
 }

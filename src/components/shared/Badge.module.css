@@ -26,11 +26,11 @@
   border-color: var(--color-border);
 }
 
-/* Accent / Primary — blue */
-.badge--accent {
-  background-color: var(--color-accent-soft);
-  color: var(--color-accent);
-  border-color: var(--color-accent-border);
+/* Primary — blue solid */
+.badge--primary {
+  background-color: var(--color-blue-primary);
+  color: white;
+  border-color: var(--color-blue-primary);
 }
 
 /* Success — green */
@@ -56,16 +56,8 @@
 
 /* Solid — nền đặc màu accent */
 .badge--solid {
-  background-color: var(--color-accent);
-  color: var(--color-text-on-accent);
-  border-color: transparent;
-}
-
-/* Ghost — không nền */
-.badge--ghost {
-  background-color: transparent;
-  color: var(--color-text-muted);
-  border-color: var(--color-border);
+  background-color: var(--color-text-primary);
+  color: var(--color-surface);
 }
 
 /* ─── Size Modifiers ──────────────────────────────────────── */
@@ -82,4 +74,12 @@
 .badgeIcon {
   display: inline-flex;
   font-size: 1em;  /* icon co theo font-size của badge */
+}
+
+/* ─── Optical Alignment ───────────────────────────────────── */
+.opticalAlign {
+  margin-left: -0.6em; /* base padding-left is 0.6em */
+}
+.opticalAlign.badge--sm {
+  margin-left: -0.5em; /* sm padding-left is 0.5em */
 }

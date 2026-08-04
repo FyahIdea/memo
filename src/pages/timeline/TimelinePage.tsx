@@ -41,7 +41,8 @@ const TimelinePage: React.FC = () => {
 
         <div className={styles.headerActions}>
           <Button
-            variant="ghost"
+            color="neutral"
+            variant="outline"
             onClick={() => setMinOffset(minOffset - 3)}
             title="Tải thêm ngày trong quá khứ"
           >
@@ -63,9 +64,10 @@ const TimelinePage: React.FC = () => {
       {/* Nút tải thêm ngày phía trên */}
       <div className={styles.loadPastContainer}>
         <Button
-          variant="ghost"
+          color="neutral"
+          variant="outline"
           onClick={() => setMinOffset(minOffset - 3)}
-          style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-extrabold)', boxShadow: '0 1px 2px rgb(0 0 0 / 0.05)' }}
+          style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-bold)', boxShadow: '0 1px 2px rgb(0 0 0 / 0.05)' }}
         >
           <Icon name="chevron_left" size="sm" style={{ color: 'var(--color-accent)' }} />
           <span>Load Previous Days</span>

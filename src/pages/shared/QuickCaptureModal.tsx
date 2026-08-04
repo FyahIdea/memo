@@ -93,7 +93,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
 
   const modalFooter = (
     <>
-      <Button variant="ghost" onClick={onClose}>Cancel</Button>
+      <Button color="neutral" variant="outline" onClick={onClose}>Cancel</Button>
       <Button variant="primary" onClick={handleSubmit}>Save Object</Button>
     </>
   );

@@ -255,7 +255,7 @@ export const NotesView: React.FC<NotesViewProps> = ({
         title="Create Structured Note"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowNewModal(false)}>Cancel</Button>
+            <Button color="neutral" variant="outline" onClick={() => setShowNewModal(false)}>Cancel</Button>
             <Button variant="primary" onClick={handleCreateSubmit} style={{ backgroundColor: 'var(--color-success)' }}>
               Save Note
             </Button>

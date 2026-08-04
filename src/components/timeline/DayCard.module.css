@@ -60,7 +60,7 @@
   color: var(--color-text-on-accent);
   padding: 0.1rem 0;
   font-size: 0.6rem;
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   font-size: var(--text-xl);
-  font-weight: var(--weight-black);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   line-height: 1;
 }
@@ -88,7 +88,7 @@
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-base);
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
 }
 
@@ -110,7 +110,7 @@
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   font-size: var(--text-xs);
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -141,7 +141,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: var(--text-xs);
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
 }
 
 .sectionHeader--events { color: var(--color-accent); }
@@ -391,7 +391,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -448,13 +448,13 @@
 }
 
 .noteCardBox {
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   color: var(--color-success);
 }
 
 .noteCardTitle {
   font-size: var(--text-xs);
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -464,7 +464,7 @@
 
 .noteCardPreview {
   font-size: 0.65rem;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;

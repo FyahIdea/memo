@@ -1,45 +1,83 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './Button.module.css';
+import { Icon } from './Icon';
+import { playButtonClick } from '../../utils/sound';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonColor = 'blue' | 'green' | 'red' | 'yellow' | 'neutral';
+export type ButtonVariant = 'primary' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
+  label?: string;
+  color?: ButtonColor;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** Nút chỉ có icon, padding đều */
+  iconPosition?: 'left' | 'right';
   iconOnly?: boolean;
-  children: React.ReactNode;
+  opticalAlign?: boolean;
+  children?: React.ReactNode;
 }
 
 /**
- * Button — nút bấm chuẩn với variants, sizes và states.
- *
- * @example
- * <Button variant="primary" onClick={...}>Capture</Button>
- * <Button variant="ghost" size="sm" iconOnly><Icon name="close" /></Button>
+ * Button — Nút bấm 3D phong cách cute, bold với bảng màu Google.
  */
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'secondary',
+  label,
+  color = 'blue',
+  variant = 'primary',
   size = 'md',
+  icon,
+  iconPosition = 'left',
   iconOnly = false,
+  opticalAlign = false,
   children,
   className,
+  disabled,
+  onClick,
   ...props
 }) => {
+  const content = label || children;
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled) {
+      playButtonClick();
+    }
+    if (onClick) {
+      onClick(e);
+    }
+  };
+  
   return (
     <button
       className={clsx(
-        styles.button,
-        styles[`button--${variant}`],
-        styles[`button--${size}`],
-        iconOnly && styles['button--icon'],
-        className,
+        styles.btn,
+        styles[variant],
+        styles[color],
+        styles[size],
+        iconOnly && styles.iconOnly,
+        opticalAlign && styles.opticalAlign,
+        className
       )}
+      disabled={disabled}
+      onClick={handleClick}
       {...props}
     >
-      {children}
+      {icon && iconPosition === 'left' && (
+        <span className={styles.iconWrapper}>
+          <Icon name={icon} size={size} />
+        </span>
+      )}
+      
+      {!iconOnly && content && (
+        <span className={styles.label}>{content}</span>
+      )}
+
+      {icon && iconPosition === 'right' && (
+        <span className={styles.iconWrapper}>
+          <Icon name={icon} size={size} />
+        </span>
+      )}
     </button>
   );
 };

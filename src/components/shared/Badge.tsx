@@ -1,8 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './Badge.module.css';
-
-export type BadgeVariant = 'default' | 'accent' | 'success' | 'warning' | 'danger' | 'solid' | 'ghost';
+export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'solid';
 export type BadgeSize = 'sm' | 'md';
 
 interface BadgeProps {
@@ -10,19 +9,21 @@ interface BadgeProps {
   size?: BadgeSize;
   children: React.ReactNode;
   className?: string;
+  opticalAlign?: boolean;
 }
 
 /**
  * Badge — label màu nhỏ dùng cho status, tag, category, streak...
  *
  * @example
- * <Badge variant="accent">Timeline</Badge>
+ * <Badge variant="primary">Timeline</Badge>
  * <Badge variant="warning">+20 PTS</Badge>
  * <Badge variant="success" size="sm">Done</Badge>
  */
 export const Badge: React.FC<BadgeProps> = ({
   variant = 'default',
   size = 'md',
+  opticalAlign = false,
   children,
   className,
 }) => {
@@ -32,6 +33,7 @@ export const Badge: React.FC<BadgeProps> = ({
         styles.badge,
         styles[`badge--${variant}`],
         size === 'sm' && styles['badge--sm'],
+        opticalAlign && styles.opticalAlign,
         className,
       )}
     >

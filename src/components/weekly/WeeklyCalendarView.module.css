@@ -127,7 +127,7 @@
 
 .dayNum {
   font-size: var(--text-lg);
-  font-weight: var(--weight-extrabold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
 }
 
@@ -172,7 +172,7 @@
 }
 
 .eventTitle {
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -211,7 +211,7 @@
 }
 
 .taskBlockTitle {
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;

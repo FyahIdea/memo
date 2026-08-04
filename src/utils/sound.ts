@@ -229,3 +229,32 @@ export function playDeleteSound() {
     osc.stop(now + 0.08);
   } catch {}
 }
+
+export function playButtonClick() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    // Cute bubble pop sound parameters
+    osc.type = 'sine';
+    
+    // Start at a higher frequency and drop down quickly
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+    
+    // Quick fade out
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.08);
+  } catch {}
+}

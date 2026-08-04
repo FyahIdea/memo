@@ -136,7 +136,7 @@ export const ObjectDetailModal: React.FC<ObjectDetailModalProps> = ({
         <div />
       )}
       <div className={styles.footerActions}>
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
+        <Button color="neutral" variant="outline" onClick={onClose}>Cancel</Button>
         <Button variant="primary" onClick={handleSave}>
           <Icon name="save" size="sm" />
           <span>Save Changes</span>
