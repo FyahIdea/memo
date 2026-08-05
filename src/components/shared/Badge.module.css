@@ -75,11 +75,3 @@
   display: inline-flex;
   font-size: 1em;  /* icon co theo font-size của badge */
 }
-
-/* ─── Optical Alignment ───────────────────────────────────── */
-.opticalAlign {
-  margin-left: -0.6em; /* base padding-left is 0.6em */
-}
-.opticalAlign.badge--sm {
-  margin-left: -0.5em; /* sm padding-left is 0.5em */
-}

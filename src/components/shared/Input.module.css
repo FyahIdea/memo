@@ -23,11 +23,6 @@
   width: 100%;
 }
 
-/* === Optical Alignment === */
-.opticalAlign.inputWrapper {
-  margin-left: -0.75em;
-}
-
 /* ─── Base input styles ───────────────────────────────────── */
 .input {
   width: 100%;

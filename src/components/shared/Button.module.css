@@ -33,12 +33,6 @@
   border-radius: var(--radius-full);
 }
 
-/* === Optical Alignment === */
-.opticalAlign.sm { margin-left: -1em; }
-.opticalAlign.md { margin-left: -1.5em; }
-.opticalAlign.lg { margin-left: -2em; }
-.opticalAlign.iconOnly { margin-left: -0.6em; }
-
 /* === Base Variants === */
 .primary {
   color: white;

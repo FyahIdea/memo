@@ -255,4 +255,33 @@ pages/
     ObjectDetailModal.tsx + ObjectDetailModal.module.css
   timeline/
     TimelinePage.tsx + TimelinePage.module.css
+
+---
+
+## 7. Các Nguyên Tắc UI/UX Khắt Khe (Từ User Feedback)
+
+Đây là những luật **BẮT BUỘC TUÂN THỦ** được đúc kết từ quá trình chỉnh sửa thực tế:
+
+### 7.1. Clean & Cute UI
+- **Tối giản & Tròn trịa**: Giao diện phải sạch sẽ, gọn gàng, các góc bo tròn dễ thương (`--radius-xl`, `--radius-full`).
+- **KHÔNG HIỆU ỨNG THỪA**: Tuyệt đối **KHÔNG** dùng `box-shadow` (kể cả shadow mờ), **KHÔNG** dùng dải màu (gradient), **KHÔNG** dùng màu giảm `opacity`. Tất cả màu phải dùng biến CSS đã định nghĩa, nếu cần màu nhạt thì dùng các biến `--color-xxx-bg` (nhờ `color-mix`).
+- **Typography tự nhiên**: Tuyệt đối **KHÔNG** dùng `text-transform: uppercase`, **KHÔNG** tăng `letter-spacing`. Cứ để chữ tự nhiên, dùng `font-weight` (chỉ dùng `400` hoặc `800`) để phân cấp.
+- **Input Focus**: Khi click vào (focus) ô Input/Textarea, **CHỈ** đổi màu `border` sang màu primary. Tuyệt đối không thêm cái viền mờ (box-shadow) màu xanh nào cả.
+- **Màu tương phản**: Chữ nằm trên **nền vàng (Yellow)** bắt buộc phải dùng **chữ trắng (White)**, không dùng chữ đen.
+
+### 7.2. Iconography
+- **Luôn dùng Icon To và Đậm**: Icon nên được ưu tiên hiển thị to, rõ ràng. Size mặc định phải là `md` (24px) trở lên.
+- **Luôn dùng biến thể FILL**: Component `<Icon>` đã được thiết lập mặc định sử dụng phong cách `FILL` của Google Material Symbols. **Không** chuyển về outline trừ phi có yêu cầu đặc biệt.
+- Nút tắt (Close Modal): Dùng icon `X` (close). **Khi hover**: Icon phải có hiệu ứng xoay (`rotate(90deg)`), nền (background) chuyển sang màu **xám nhạt** (`var(--color-surface-alt)`). Tuyệt đối không dùng màu đỏ cho nút đóng chuẩn.
+
+### 7.3. Optical Alignment (Căn lề thị giác)
+- **Định nghĩa**: Là việc dùng `margin-left` âm để kéo ngược khối (box) sang trái, giúp **chữ** bên trong gióng thẳng hàng với lưới (grid) của trang web như cách Google làm.
+- **Luật áp dụng**: **TẮT MẶC ĐỊNH** (`opticalAlign = false`) cho mọi component (Button, Card, Badge, Input). 
+- **Lý do**: Nếu bật mặc định trên một hàng ngang (flex row), các component phía sau sẽ tự động lùi vào khoảng trống của component phía trước, làm hỏng hoàn toàn khoảng cách (gap) và đè lên nhau (overlap).
+- **Cách dùng**: Chỉ truyền prop `opticalAlign={true}` (hoặc dùng class toàn cục `.opticalAlign` với `margin-left: -0.75rem; margin-right: 0.75rem`) cho các component **đứng đầu dòng ở mép trái**, hoặc trong một danh sách xếp dọc (vertical list).
+
+### 7.4. Tái sử dụng & Quy tắc Code
+- **Không Hardcode**: Trước khi code cứng một thành phần UI mới (như vẽ một cái badge hay nút bằng HTML thẻ `span`, `div`), **PHẢI** kiểm tra xem trong thư mục `components/shared` đã có component đó chưa. Nếu có `<Badge>`, `<Button>`, `<Icon>` thì bắt buộc phải import và xài lại.
+- **Không đụng Backend**: Nếu User báo lỗi liên quan tới backend, **chỉ** giải thích nguyên nhân và đưa ra hướng dẫn để User tự fix. Tuyệt đối **KHÔNG** tự ý chỉnh sửa file backend.
+- **Comment Code**: Chỉ sử dụng tiếng Việt. Không dùng tiếng Anh.
 ```

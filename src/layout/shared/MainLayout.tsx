@@ -115,19 +115,21 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </header>
 
-        {/* Nội dung trang — slot cho các Page component */}
-        <div className={styles.content}>
-          {children}
-        </div>
+        {/* Nội dung trang & Footer được bọc trong contentWrapper để tạo viền */}
+        <div className={styles.contentWrapper}>
+          <div className={styles.content}>
+            {children}
+          </div>
 
-        {/* Footer */}
-        <footer className={styles.footer}>
-          <span className={styles.footerBrand}>Memo · Personal Objects Studio</span>
-          <button className={styles.footerReset} onClick={handleResetData}>
-            <Icon name="history" size="sm" />
-            <span>Reset Seed Data</span>
-          </button>
-        </footer>
+          {/* Footer */}
+          <footer className={styles.footer}>
+            <span className={styles.footerBrand}>Memo · Personal Objects Studio</span>
+            <button className={styles.footerReset} onClick={handleResetData}>
+              <Icon name="history" size="sm" />
+              <span>Reset Seed Data</span>
+            </button>
+          </footer>
+        </div>
       </div>
 
       {/* Modal Streak & Gamification */}

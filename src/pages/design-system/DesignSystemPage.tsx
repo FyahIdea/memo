@@ -6,10 +6,17 @@ import { Card } from '../../components/shared/Card';
 import { Icon } from '../../components/shared/Icon';
 import { InputField } from '../../components/shared/Input';
 import { Modal } from '../../components/shared/Modal';
+import { Checkbox } from '../../components/shared/Checkbox';
+import { Radio } from '../../components/shared/Radio';
+import { Switch } from '../../components/shared/Switch';
+import { Avatar } from '../../components/shared/Avatar';
+import { Alert } from '../../components/shared/Alert';
+import { TaskItem, TaskStatus } from '../../components/tasks/TaskItem';
 
 const DesignSystemPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [demoTaskStatus, setDemoTaskStatus] = useState<TaskStatus>('todo');
 
   const colors = [
     { name: 'Red Dark', var: 'var(--color-red-dark)' },
@@ -229,20 +236,125 @@ const DesignSystemPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Demo Modal */}
-      <Modal
-        isOpen={isModalOpen}
+      {/* Forms & Toggles Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Checkboxes, Radios & Switches</h2>
+        <div className={styles.grid}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Checkbox label="Default Checkbox" />
+            <Checkbox label="Checked by default" defaultChecked />
+            <Checkbox label="Disabled Checkbox" disabled />
+            <Checkbox label="With Description" description="This is a sub-label explaining the option." />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Radio name="demo" label="Option 1" defaultChecked />
+            <Radio name="demo" label="Option 2" />
+            <Radio name="demo" label="Disabled Radio" disabled />
+            <Radio label="With Description" description="Radios can also have descriptions." />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Switch label="Default Switch" />
+            <Switch label="Active Switch" defaultChecked />
+            <Switch label="Disabled Switch" disabled />
+            <Switch label="With Description" description="Enable this to turn on awesome features." />
+          </div>
+        </div>
+      </section>
+
+      {/* Avatars Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Avatars</h2>
+        <div className={styles.flexRow} style={{ alignItems: 'center' }}>
+          <Avatar size="sm" fallback="H" />
+          <Avatar size="md" fallback="H" />
+          <Avatar size="lg" fallback="HT" />
+          <Avatar size="xl" fallback="HT" />
+          <Avatar size="lg" />
+          <Avatar size="lg" src="https://i.pravatar.cc/150?img=32" />
+        </div>
+      </section>
+
+      {/* Task Item Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Task Item (Core Object)</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0', background: 'var(--color-surface)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+          <TaskItem 
+            id="t1"
+            title="Hoàn thiện màn hình Design System"
+            status={demoTaskStatus}
+            onStatusChange={setDemoTaskStatus}
+            taskType="short_term"
+            points={50}
+            reward="1 Iced Coffee"
+            rewardIcon="local_cafe"
+            rewardPrice="$3.00"
+            deadline="Today, 23:59"
+            subtasks={{ completed: 2, total: 5 }}
+            isPinned={true}
+            onRemove={() => console.log('remove')}
+            notes="Nhớ check lại các component UI có ngữ nghĩa (không dùng badge nhàm chán). Chú ý: Hãy thử ấn giữ (long press) vào ô checkbox để mở menu tuỳ chọn."
+          />
+          <TaskItem 
+            id="t2"
+            title="Một task lặt vặt (Quick task)"
+            status="todo"
+            taskType="quick"
+          />
+          <TaskItem 
+            id="t3"
+            title="Task đã hoàn thành"
+            status="done"
+            timeSpent="30m"
+          />
+        </div>
+      </section>
+
+      {/* Alerts Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Alerts & Callouts</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Alert variant="info" title="Did you know? (Soft)">
+            This is an info alert. It's useful for displaying general information.
+          </Alert>
+          <Alert 
+            variant="success" 
+            title="Successfully saved (Soft)"
+            action={<Button variant="outline" color="neutral">Undo</Button>}
+          >
+            Your changes have been saved to the database.
+          </Alert>
+          <Alert variant="warning" appearance="outline" title="Warning (Outline)">
+            Your subscription is about to expire in 3 days.
+          </Alert>
+          <Alert 
+            variant="error" 
+            appearance="outline"
+            title="Connection Error (Outline)"
+            action={<Button variant="primary" color="red">Retry connection</Button>}
+          >
+            Could not connect to the server. Please try again later.
+          </Alert>
+        </div>
+      </section>
+
+      {/* Modal Demo */}
+      <Modal 
+        isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
-        title="Design System Modal"
+        icon="notifications"
+        title="Example Modal"
+        description="This is a description text that explains the purpose of this modal in detail."
         footer={
           <>
             <Button color="neutral" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={() => setIsModalOpen(false)}>Confirm</Button>
+            <Button color="blue" onClick={() => setIsModalOpen(false)}>Confirm</Button>
           </>
         }
       >
-        <p>This is a standard modal component used throughout the application.</p>
-        <p style={{ marginTop: 'var(--space-2)' }}>It features a consistent header, body padding, and footer actions layout.</p>
+        <p>This is the modal body. You can put any React components here.</p>
+        <div style={{ marginTop: '1rem' }}>
+          <InputField opticalAlign={true} label="Name" placeholder="Enter your name" />
+        </div>
       </Modal>
     </div>
   );

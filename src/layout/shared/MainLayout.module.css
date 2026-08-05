@@ -5,7 +5,7 @@
 .app {
   display: flex;
   min-height: 100dvh;
-  background-color: var(--color-bg);
+  background-color: var(--color-surface); /* Matches sidebar and header */
   color: var(--color-text-primary);
   font-family: var(--font-sans);
 }
@@ -33,7 +33,6 @@
   z-index: var(--z-raised);
   background-color: color-mix(in srgb, var(--color-surface) 90%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
   padding: var(--space-3) var(--layout-padding);
   display: flex;
   align-items: center;
@@ -199,6 +198,17 @@
 }
 
 /* ─── Content area ─────────────────────────────────────────── */
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  border-top-left-radius: var(--radius-2xl);
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
 .content {
   max-width: 75rem;   /* 1200px */
   width: 100%;

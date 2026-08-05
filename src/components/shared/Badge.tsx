@@ -33,7 +33,7 @@ export const Badge: React.FC<BadgeProps> = ({
         styles.badge,
         styles[`badge--${variant}`],
         size === 'sm' && styles['badge--sm'],
-        opticalAlign && styles.opticalAlign,
+        opticalAlign && 'opticalAlign',
         className,
       )}
     >

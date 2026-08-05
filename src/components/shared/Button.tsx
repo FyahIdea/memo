@@ -13,6 +13,7 @@ interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>
   color?: ButtonColor;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  icon?: string;
   iconPosition?: 'left' | 'right';
   iconOnly?: boolean;
   opticalAlign?: boolean;
@@ -56,7 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
         styles[color],
         styles[size],
         iconOnly && styles.iconOnly,
-        opticalAlign && styles.opticalAlign,
+        opticalAlign && 'opticalAlign',
         className
       )}
       disabled={disabled}

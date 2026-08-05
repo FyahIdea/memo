@@ -1,0 +1,534 @@
+/* Notebook lines layout */
+.taskItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 0.875rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  background-color: transparent;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+
+
+.taskItem:last-child {
+  border-bottom-color: transparent;
+}
+
+.taskItem:hover {
+  background-color: transparent;
+  border-bottom-color: var(--color-neutral-secondary);
+}
+
+/* Vẫn giữ đường kẻ ở task cuối cùng để giống trang vở kéo dài */
+
+/* ─── Hiệu ứng mờ khi Done/Cancel ─── */
+/* CHÚ Ý: KHÔNG set opacity lên thẻ cha .taskItem hoặc .mainContent 
+   vì sẽ làm mờ cả Tooltip bên trong. Chỉ làm mờ cụ thể chữ và icon */
+.taskItemFaded .checkbox,
+.taskItemFaded .title,
+.taskItemFaded .metaText,
+.taskItemFaded .notesIconWrap,
+.taskItemFaded .pointsBadge,
+.taskItemFaded .rewardBadge,
+.taskItemFaded .removeBtn,
+.taskItemFaded .progressGroup {
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+/* ─── Cột trái: Checkbox ─── */
+.checkboxArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -1px; /* Căn chỉnh hoàn hảo với tâm của text (line-height 1.4) */
+  flex-shrink: 0;
+  position: relative;
+  /* Để định vị statusMenu */
+}
+
+/* Icon chỉ chính xác vào checkbox */
+.checkboxArea::before {
+  content: 'play_arrow';
+  font-family: 'Material Symbols Rounded';
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  position: absolute;
+  left: -2em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  font-size: 1.5rem;
+  color: var(--color-neutral-secondary);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none;
+}
+
+.taskItem:hover .checkboxArea::before {
+  opacity: 1;
+  left: -1.5rem;
+  /* Trượt vào nhưng giữ một khoảng cách an toàn với checkbox */
+}
+
+/* Mặc định checkbox là hình TRÒN (cho quick task) */
+.checkbox {
+  width: 1.5rem;
+  /* 24px */
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Checkbox vuông (cho short_term / long_term) */
+.checkboxSquare {
+  border-radius: 0.375rem;
+  /* Bo góc nhẹ 6px */
+}
+
+/* Chỉ scale khi hover, KHÔNG đổi màu viền sang đen */
+.checkbox:hover {
+  transform: scale(1.15);
+}
+
+.checkbox:active {
+  transform: scale(0.9);
+}
+
+.checkIcon {
+  color: white;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.boxTodo {
+  /* mặc định */
+}
+
+.boxDone {
+  background: var(--color-green-primary);
+  border-color: var(--color-green-primary);
+}
+
+/* Đổi done thành xanh lá theo yêu cầu */
+.boxInProgress {
+  background: var(--color-blue-primary);
+  border-color: var(--color-blue-primary);
+}
+
+.boxCancelled {
+  background: var(--color-red-primary);
+  border-color: var(--color-red-primary);
+}
+
+/* ─── Menu Popover Trạng thái ─── */
+.menuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.statusMenu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 101;
+  min-width: 10.5rem;
+  animation: menuIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Status menu KHÔNG bao giờ bị mờ */
+  opacity: 1 !important;
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.6rem 0.75rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 700;
+  transition: background-color 0.12s;
+  color: var(--color-text-primary);
+}
+
+.menuItem:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.menuDone {
+  color: var(--color-green-primary);
+}
+
+/* Xanh lá */
+.menuInProgress {
+  color: var(--color-blue-primary);
+}
+
+.menuCancelled {
+  color: var(--color-red-primary);
+}
+
+.menuTodo {
+  color: var(--color-text-secondary);
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--color-border-soft);
+  margin: 0.15rem 0;
+}
+
+/* ─── Cột giữa: Nội dung ─── */
+.mainContent {
+  flex: 1;
+  min-width: 0;
+  /* Quan trọng để title truncate */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  /* Cách nhau xíu xiu */
+}
+
+/* Title + Notes cùng trên 1 hàng */
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  /* Vẫn căn giữa theo hàng ngang với các icon bên trong */
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  /* Để title tự cắt gọn nếu quá dài, còn notesTooltip thì không bị co */
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.titleDone .title,
+.titleCancelled .title {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: var(--color-text-muted);
+}
+
+.titleDone .notesIconWrap,
+.titleCancelled .notesIconWrap {
+  opacity: 0.5;
+}
+
+/* ─── Ghi chú (Notes) ─── */
+.notesTooltip {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.notesIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 0.15rem;
+}
+
+.notesIconGrey {
+  color: var(--color-text-muted);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: rotate(-15deg);
+}
+
+.notesIconWrap:hover .notesIconGrey {
+  transform: rotate(0deg);
+  color: var(--color-blue-primary);
+}
+
+/* ─── Note Rich Tooltip ─── */
+.noteRichTooltip {
+  width: 260px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: left;
+}
+
+.noteTooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: var(--color-blue-primary);
+  margin-bottom: 0.75rem;
+  font-size: var(--text-p);
+}
+
+.noteTooltipHeaderIcon {
+  color: var(--color-blue-secondary);
+}
+
+.noteTooltipBody {
+  font-size: var(--text-small);
+  color: var(--color-text-primary);
+  border-left: 2px solid var(--color-blue-primary);
+  padding-left: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+/* ─── Progress Bar ─── */
+.progressGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.progressBarWrap {
+  width: 80px;
+  /* Ngắn lại một chút */
+  height: 6px;
+  /* Trả về độ dày ban đầu */
+  background-color: var(--color-blue-bg);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: var(--color-blue-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* Metadata nằm cùng 1 dòng mỏng mảnh phía dưới */
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: 0.2rem;
+}
+
+/* Thời gian, thông tin phụ */
+.metaText {
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* Cột phải: Actions & Điểm/Quà */
+.rightActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  padding-left: var(--space-2);
+  margin-top: 2px;
+  /* Đồng bộ với title */
+}
+
+.pointsBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-yellow-primary);
+}
+
+/* Reward Badge */
+.rewardBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-full);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rewardBadge:hover {
+  background-color: var(--color-surface-alt);
+}
+
+/* --- Rich Tooltip cho Reward --- */
+.rewardRichTooltip {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  width: 260px;
+  background-color: var(--color-surface);
+  text-align: left;
+  border: 1px solid var(--color-border);
+  /* Đã thêm viền cho giống Card */
+}
+
+.rewardCover {
+  width: 100%;
+  height: 100px;
+  background-color: var(--color-border-soft);
+}
+
+.rewardCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rewardBody {
+  padding: 0 1rem 1rem 1rem;
+  position: relative;
+}
+
+.rewardAvatarBox {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: var(--color-blue-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -24px;
+  /* overlap */
+  border: 3px solid var(--color-surface);
+  margin-bottom: 0.5rem;
+}
+
+.rewardHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.rewardTitleText {
+  font-size: var(--text-p);
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.rewardPrice {
+  font-size: var(--text-p);
+  font-weight: 700;
+  color: var(--color-blue-primary);
+}
+
+.rewardLocation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+.storeIcon {
+  color: var(--color-border);
+  /* Nhạt hơn text (text-secondary) */
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transform: rotate(0deg);
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s, transform 0.3s ease;
+}
+
+.taskItem:hover .removeBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.removeBtn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-primary);
+  transform: rotate(180deg);
+}
+
+.progressSvg {
+  width: 2rem;
+  height: 2rem;
+  transform: rotate(-90deg);
+}
+
+.progressTrack {
+  stroke: var(--color-blue-bg);
+  fill: none;
+  stroke-width: 3.5;
+  /* Viền dày rõ ràng */
+}
+
+.progressArc {
+  stroke: var(--color-blue-primary);
+  /* Có thể đổi màu progress ring nếu muốn */
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

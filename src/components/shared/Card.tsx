@@ -42,7 +42,7 @@ export const Card: React.FC<CardProps> = ({
         styles[`card--${variant}`],
         styles[padClass],
         styles[radiusClass],
-        opticalAlign && styles.opticalAlign,
+        opticalAlign && 'opticalAlign',
         className,
       )}
       onClick={onClick}

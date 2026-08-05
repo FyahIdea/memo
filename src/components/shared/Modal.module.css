@@ -27,6 +27,7 @@
   border-radius: var(--radius-2xl);
   width: 100%;
   max-height: calc(100dvh - 4rem);
+  padding: var(--space-4);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -52,20 +53,65 @@
 /* ─── Header ──────────────────────────────────────────────── */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-border-soft);
   flex-shrink: 0;
+  gap: var(--space-4);
+}
+
+.headerContent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.headerIcon {
+  color: var(--color-accent);
+  margin-top: 0.125em;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .title {
-  font-size: var(--text-md);
+  font-size: var(--text-h3);
   font-weight: var(--weight-bold);
   color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  line-height: var(--leading-tight);
+}
+
+.description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.closeBtn {
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  padding: var(--space-1);
+  display: inline-flex;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  margin-top: -0.25em; /* Căn chỉnh nhẹ với title */
+  margin-right: -0.25em;
+}
+.closeBtn:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-alt);
+}
+
+.closeIcon {
+  transition: transform var(--transition-normal);
+}
+.closeBtn:hover .closeIcon {
+  transform: rotate(90deg);
 }
 
 /* ─── Body ────────────────────────────────────────────────── */

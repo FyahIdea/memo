@@ -1,0 +1,97 @@
+.wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.wrapperDisabled {
+  cursor: not-allowed;
+}
+
+.wrapperDisabled .label {
+  cursor: not-allowed;
+}
+
+.switchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 2.5rem; /* 40px */
+  height: 1.5rem; /* 24px */
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+  margin: 0;
+}
+
+.track {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  pointer-events: none;
+}
+
+.thumb {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: white;
+  border-radius: var(--radius-full);
+  /* no box-shadow to keep clean look, relying on high contrast */
+  transition: transform var(--transition-fast);
+}
+
+.input:checked + .track {
+  background-color: var(--color-accent);
+}
+
+.input:checked + .track .thumb {
+  transform: translateX(1rem); /* 2.5rem - 1.25rem - 0.25rem = 1rem */
+}
+
+.input:focus-visible + .track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.input:disabled {
+  pointer-events: none;
+}
+
+.input:disabled + .track {
+  opacity: 0.6;
+  background-color: var(--color-border);
+}
+
+.input:disabled ~ .textContainer {
+  opacity: 0.6;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

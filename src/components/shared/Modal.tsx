@@ -9,7 +9,9 @@ export type ModalSize = 'sm' | 'md' | 'lg';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  icon?: string;
   title?: React.ReactNode;
+  description?: React.ReactNode;
   size?: ModalSize;
   children: React.ReactNode;
   /** Nội dung footer (thường là các nút hành động) */
@@ -29,7 +31,9 @@ interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
+  icon,
   title,
+  description,
   size = 'md',
   children,
   footer,
@@ -58,14 +62,18 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
       >
         {/* Header */}
-        {title && (
-          <div className={styles.header}>
-            <span className={styles.title}>{title}</span>
-            <Button color="neutral" variant="outline" size="sm" iconOnly onClick={onClose} aria-label="Đóng">
-              <Icon name="close" size="sm" />
-            </Button>
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            {icon && <Icon name={icon} className={styles.headerIcon} size="lg" />}
+            <div className={styles.headerText}>
+              {title && <span className={styles.title}>{title}</span>}
+              {description && <span className={styles.description}>{description}</span>}
+            </div>
           </div>
-        )}
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Đóng">
+            <Icon name="close" size="md" className={styles.closeIcon} />
+          </button>
+        </div>
 
         {/* Body */}
         <div className={styles.body}>

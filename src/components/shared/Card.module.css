@@ -15,11 +15,6 @@
 .card--padLg { padding: var(--space-8); }
 .card--padNone { padding: 0; }
 
-/* === Optical Alignment === */
-.opticalAlign.card--padSm { margin-left: calc(-1 * var(--space-3)); }
-.opticalAlign.card--padMd { margin-left: calc(-1 * var(--space-5)); }
-.opticalAlign.card--padLg { margin-left: calc(-1 * var(--space-8)); }
-
 /* ─── Radius Variants ─────────────────────────────────────── */
 .card--radiusMd  { border-radius: var(--radius-lg); }
 .card--radiusLg  { border-radius: var(--radius-xl); }

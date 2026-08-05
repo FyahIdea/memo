@@ -230,6 +230,7 @@ export function playDeleteSound() {
   } catch {}
 }
 
+
 export function playButtonClick() {
   if (!soundEnabled) return;
   const ctx = getAudioContext();
@@ -240,15 +241,16 @@ export function playButtonClick() {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    // Cute bubble pop sound parameters
+    // Cute, bouncy "pop" (pitch sweeps up quickly)
     osc.type = 'sine';
     
-    // Start at a higher frequency and drop down quickly
-    osc.frequency.setValueAtTime(600, now);
-    osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+    // Pitch starts medium and sweeps high
+    osc.frequency.setValueAtTime(500, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.06);
     
-    // Quick fade out
-    gain.gain.setValueAtTime(0.15, now);
+    // Soft attack and quick fade
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.15, now + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
     
     osc.connect(gain);
@@ -256,5 +258,127 @@ export function playButtonClick() {
     
     osc.start(now);
     osc.stop(now + 0.08);
+  } catch {}
+}
+
+export function playToggleOn() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+    
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.05);
+  } catch {}
+}
+
+export function playToggleOff() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+    
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.05);
+  } catch {}
+}
+
+export function playTaskInProgress() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    // 2 nốt ascending ngắn — nghe như "let's go!"
+    const now = ctx.currentTime;
+    const notes = [600, 900];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.07);
+      gain.gain.setValueAtTime(0, now + i * 0.07);
+      gain.gain.linearRampToValueAtTime(0.12, now + i * 0.07 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.06);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.07);
+      osc.stop(now + i * 0.07 + 0.07);
+    });
+  } catch {}
+}
+
+export function playTaskCancelled() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    // 1 nốt xuống nhẹ nhàng — nghe như "okay, skip"
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(500, now);
+    osc.frequency.exponentialRampToValueAtTime(250, now + 0.12);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  } catch {}
+}
+
+/**
+ * Dull thump sound for disabled or unclickable elements
+ */
+export function playDisabledClick() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.1);
   } catch {}
 }

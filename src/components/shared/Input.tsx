@@ -41,7 +41,7 @@ export const InputField: React.FC<InputProps> = ({
           {label}
         </label>
       )}
-      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+      <div className={clsx(styles.inputWrapper, opticalAlign && 'opticalAlign')}>
         {leftIcon && (
           <span className={clsx(styles.icon, styles.iconLeft)}>
             <Icon name={leftIcon} size="md" />
@@ -100,7 +100,7 @@ export const TextareaField: React.FC<TextareaProps> = ({
           {label}
         </label>
       )}
-      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+      <div className={clsx(styles.inputWrapper, opticalAlign && 'opticalAlign')}>
         <textarea
           id={inputId}
           className={clsx(styles.input, styles.textarea, error && styles['input--error'], className)}
@@ -145,7 +145,7 @@ export const SelectField: React.FC<SelectProps> = ({
           {label}
         </label>
       )}
-      <div className={clsx(styles.inputWrapper, opticalAlign && styles.opticalAlign)}>
+      <div className={clsx(styles.inputWrapper, opticalAlign && 'opticalAlign')}>
         <select
           id={inputId}
           className={clsx(styles.input, styles.select, error && styles['input--error'], className)}
