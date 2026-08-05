@@ -69,6 +69,129 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  
+  // Title editing state
+  const [displayTitle, setDisplayTitle] = useState(title);
+
+  useEffect(() => {
+    setDisplayTitle(title);
+  }, [title]);
+
+  // Swipe-to-reveal state (Mobile only)
+  const [translateX, setTranslateX] = useState(0);
+  const swipeStartX = useRef<number | null>(null);
+  const swipeStartTranslateX = useRef<number>(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.innerWidth > 600 || disabled || !onRemove) return;
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartTranslateX.current = translateX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (swipeStartX.current === null) return;
+    const diff = e.touches[0].clientX - swipeStartX.current;
+    let newX = swipeStartTranslateX.current + diff;
+    if (newX > 0) newX = 0;
+    if (newX < -100) newX = -100;
+    setTranslateX(newX);
+  };
+
+  const handleTouchEnd = () => {
+    if (swipeStartX.current === null) return;
+    if (translateX < -40) {
+      setTranslateX(-80); // snap open
+    } else {
+      setTranslateX(0); // snap close
+    }
+    swipeStartX.current = null;
+  };
+
+  useEffect(() => {
+    if (translateX === 0) return;
+    const closeSwipe = () => setTranslateX(0);
+    const timer = setTimeout(() => {
+      document.addEventListener('touchstart', closeSwipe);
+      document.addEventListener('mousedown', closeSwipe);
+    }, 10);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('touchstart', closeSwipe);
+      document.removeEventListener('mousedown', closeSwipe);
+    };
+  }, [translateX]);
+
+  const renderNoteIcon = (customClass?: string) => {
+    if (!notes) return null;
+    return (
+      <Tooltip 
+        position="top" 
+        className={clsx(styles.notesTooltip, customClass)}
+        noPadding
+        content={
+          <div className={styles.noteRichTooltip}>
+            <div className={styles.noteTooltipHeader}>
+              <Icon name="description" size="sm" filled className={styles.noteTooltipHeaderIcon} />
+              <span>Notes</span>
+            </div>
+            <div className={styles.noteTooltipBody}>
+              {notes}
+            </div>
+          </div>
+        }
+      >
+        <div className={styles.notesIconWrap}>
+          <Icon name="description" size="sm" filled className={styles.notesIconGrey} />
+        </div>
+      </Tooltip>
+    );
+  };
+
+  const renderPointsAndRewards = (wrapperClass?: string) => {
+    if (points === undefined && !reward) return null;
+    return (
+      <div className={wrapperClass}>
+        {points !== undefined && (
+          <div className={styles.pointsBadge}>
+            <Icon name="stars" size="sm" filled /> {points}
+          </div>
+        )}
+
+        {reward && (
+          <Tooltip 
+            noPadding
+            position="top"
+            content={
+              <div className={styles.rewardRichTooltip}>
+                <div className={styles.rewardCover}>
+                  <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&h=200&fit=crop" alt="Reward Cover" />
+                </div>
+                <div className={styles.rewardBody}>
+                  <div className={styles.rewardAvatarBox}>
+                    <Icon name={rewardIcon} size="md" filled />
+                  </div>
+                  <div className={styles.rewardHeaderRow}>
+                    <span className={styles.rewardTitleText}>{reward}</span>
+                    <span className={styles.rewardPrice}>{rewardPrice || `★${points || 50}`}</span>
+                  </div>
+                  <div className={styles.rewardLocation}>
+                    <Icon name="storefront" size="sm" className={styles.storeIcon} />
+                    <span>Convenience Store</span>
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <div className={styles.rewardBadge}>
+              <Icon name="local_cafe" size="sm" filled className={styles.rewardIcon} />
+              <span className={styles.rewardText}>Reward</span>
+            </div>
+          </Tooltip>
+        )}
+      </div>
+    );
+  };
+
   const longPressProps = useLongPress(() => {
     if (!disabled) setShowMenu(true);
   }, 400);
@@ -130,7 +253,23 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const hasMeta = deadline || timeSpent || points !== undefined || reward || notes;
 
   return (
-    <div className={clsx(styles.taskItem, isFaded && styles.taskItemFaded, isShaking && 'shake-animation', className)}>
+    <div className={clsx(styles.swipeWrapper, className)}>
+      {/* Background action (Delete) */}
+      <div className={styles.swipeBackground}>
+        {onRemove && (
+          <button className={styles.swipeRemoveBtn} onClick={(e) => { e.stopPropagation(); onRemove(); }}>
+            <Icon name="delete" filled />
+          </button>
+        )}
+      </div>
+
+      <div 
+        className={clsx(styles.taskItem, isFaded && styles.taskItemFaded, isShaking && 'shake-animation')}
+        style={{ transform: `translateX(${translateX}px)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
 
       {/* ─── Cột trái: Checkbox ─── */}
       <div className={styles.checkboxArea}>
@@ -171,87 +310,77 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         
         {/* Tiêu đề + Ghi chú */}
         <div className={clsx(styles.titleWrapper, isDone && styles.titleDone, isCancelled && styles.titleCancelled)}>
-          <span className={styles.title}>{title}</span>
-          {notes && (
-            <Tooltip 
-              position="top" 
-              className={styles.notesTooltip}
-              noPadding
-              content={
-                <div className={styles.noteRichTooltip}>
-                  <div className={styles.noteTooltipHeader}>
-                    <Icon name="description" size="sm" filled className={styles.noteTooltipHeaderIcon} />
-                    <span>Notes</span>
-                  </div>
-                  <div className={styles.noteTooltipBody}>
-                    {notes}
-                  </div>
-                </div>
+          <span 
+            className={styles.title}
+            contentEditable={!disabled}
+            suppressContentEditableWarning={true}
+            onBlur={(e) => {
+              const newTitle = e.currentTarget.textContent || '';
+              if (newTitle.trim()) {
+                setDisplayTitle(newTitle.trim());
+              } else {
+                e.currentTarget.textContent = displayTitle; // revert visually
               }
-            >
-              <div className={styles.notesIconWrap}>
-                <Icon name="description" size="sm" filled className={styles.notesIconGrey} />
-              </div>
-            </Tooltip>
-          )}
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+              if (e.key === 'Escape') {
+                e.currentTarget.textContent = displayTitle;
+                e.currentTarget.blur();
+              }
+            }}
+          >
+            {displayTitle}
+          </span>
+          {renderNoteIcon(styles.desktopNoteIcon)}
         </div>
 
         {/* Thời gian, Meta & Progress chung 1 dòng */}
         {(showProgressBar || hasMeta) && (
           <div className={styles.metaRow}>
             {showProgressBar && (
-              <div className={styles.progressGroup}>
-                <div className={styles.progressBarWrap}>
-                  <div className={styles.progressBarFill} style={{ width: `${percent}%` }} />
+              <>
+                {/* Desktop Progress Bar */}
+                <div className={clsx(styles.progressGroup, styles.desktopProgress)}>
+                  <div className={styles.progressBarWrap}>
+                    <div className={styles.progressBarFill} style={{ width: `${percent}%` }} />
+                  </div>
+                  <span className={styles.progressText}>{subtaskText}</span>
                 </div>
-                <span className={styles.progressText}>{subtaskText}</span>
-              </div>
+                {/* Mobile Progress Ring */}
+                <div className={clsx(styles.progressGroup, styles.mobileProgress)}>
+                  <div className={styles.progressRingWrapper}>
+                    <svg className={styles.progressSvg} viewBox="0 0 36 36">
+                      <path
+                        className={styles.progressTrack}
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className={styles.progressArc}
+                        strokeDasharray={`${percent}, 100`}
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                    </svg>
+                    <span className={styles.progressRingText}>{subtaskText}</span>
+                  </div>
+                </div>
+              </>
             )}
             
             {deadline && <span className={styles.metaText}>{deadline}</span>}
             {timeSpent && <span className={styles.metaText}>{timeSpent}</span>}
+            {renderNoteIcon(styles.mobileNoteIcon)}
+            {renderPointsAndRewards(styles.mobilePoints)}
           </div>
         )}
       </div>
 
       {/* ─── Cột phải: Actions & Điểm/Quà ─── */}
       <div className={styles.rightActions}>
-        {points !== undefined && (
-          <div className={styles.pointsBadge}>
-            <Icon name="stars" size="sm" filled /> {points}
-          </div>
-        )}
-
-        {reward && (
-          <Tooltip 
-            noPadding
-            position="top"
-            content={
-              <div className={styles.rewardRichTooltip}>
-                <div className={styles.rewardCover}>
-                  <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&h=200&fit=crop" alt="Reward Cover" />
-                </div>
-                <div className={styles.rewardBody}>
-                  <div className={styles.rewardAvatarBox}>
-                    <Icon name={rewardIcon} size="md" filled />
-                  </div>
-                  <div className={styles.rewardHeaderRow}>
-                    <span className={styles.rewardTitleText}>{reward}</span>
-                    <span className={styles.rewardPrice}>{rewardPrice || `★${points || 50}`}</span>
-                  </div>
-                  <div className={styles.rewardLocation}>
-                    <Icon name="storefront" size="sm" className={styles.storeIcon} />
-                    <span>Convenience Store</span>
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <div className={styles.rewardBadge}>
-              Reward
-            </div>
-          </Tooltip>
-        )}
+        {renderPointsAndRewards(styles.desktopPoints)}
 
         {onRemove && (
           <Tooltip content="Remove task" position="top">
@@ -260,6 +389,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </button>
           </Tooltip>
         )}
+      </div>
       </div>
     </div>
   );
