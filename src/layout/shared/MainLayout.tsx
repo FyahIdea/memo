@@ -4,7 +4,7 @@ import { Sidebar } from '../../components/shared/Sidebar';
 import { Icon } from '../../components/shared/Icon';
 import { Modal } from '../../components/shared/Modal';
 import { Button } from '../../components/shared/Button';
-import { TaskSidebarPanel } from '../../components/tasks/TaskSidebarPanel';
+import { TaskPoolPanel } from '../../components/tasks/TaskPoolPanel';
 import { QuickCaptureModal } from '../../pages/shared/QuickCaptureModal';
 import { ObjectDetailModal } from '../../pages/shared/ObjectDetailModal';
 import { useApp } from '../../contexts/AppContext';
@@ -169,8 +169,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </Modal>
 
-      {/* Task Pool Sidebar Panel */}
-      <TaskSidebarPanel
+      {/* Task Pool Panel — dạng push sidebar, nằm trong DOM flow của .app */}
+      <TaskPoolPanel
         tasks={appState.tasks}
         isOpen={isSidebarPanelOpen}
         onClose={() => setIsSidebarPanelOpen(false)}

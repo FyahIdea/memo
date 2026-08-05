@@ -196,7 +196,16 @@ ComponentName.module.css    ← đặt cùng thư mục với .tsx
 | `Button` | `components/shared/Button.tsx` | Nút có variants |
 | `Card` | `components/shared/Card.tsx` | Container nội dung |
 | `Modal` | `components/shared/Modal.tsx` | Overlay dialog base |
+| `SidebarPanel` | `components/shared/SidebarPanel.tsx` | Base panel cho các Sidebar trượt |
 | `Input` | `components/shared/Input.tsx` | Text input chuẩn |
+| `Checkbox` | `components/shared/Checkbox.tsx` | Ô tick chọn |
+| `Radio` | `components/shared/Radio.tsx` | Lựa chọn đơn (radio button) |
+| `Switch` | `components/shared/Switch.tsx` | Nút gạt bật/tắt |
+| `Dropdown` | `components/shared/Dropdown.tsx` | Menu thả xuống |
+| `SegmentedControl` | `components/shared/SegmentedControl.tsx` | Thanh chọn tab ngang |
+| `Tooltip` | `components/shared/Tooltip.tsx` | Hint box khi hover |
+| `Alert` | `components/shared/Alert.tsx` | Hộp thông báo trạng thái |
+| `Avatar` | `components/shared/Avatar.tsx` | Hiển thị ảnh đại diện / icon user |
 
 ### Badge variants
 - `default` (slate) — label chung
@@ -218,6 +227,11 @@ ComponentName.module.css    ← đặt cùng thư mục với .tsx
 - `lg` = `2rem` (32px)
 - `xl` = `2.5rem` (40px)
 
+### TaskItem (components/tasks/TaskItem.tsx)
+- `variant="default"` — Hiển thị đầy đủ chi tiết, cho phép sửa title trực tiếp, menu trạng thái khi long press. Dùng cho Timeline / DayCard.
+- `variant="pool"` — Giao diện rút gọn gọn gàng hơn, font chữ nhỏ hơn, các metadata nằm ngang liên tiếp. Không sửa title trực tiếp. Chuyên dùng cho Task Pool Panel.
+- Các tính năng có thể tắt bật: `disableStatusMenu`, `disableTitleEdit`, `onClick` handler.
+
 ---
 
 ## 6. File Structure
@@ -225,21 +239,31 @@ ComponentName.module.css    ← đặt cùng thư mục với .tsx
 ```
 components/
   shared/
-    Icon.tsx + Icon.module.css
+    Alert.tsx + Alert.module.css
+    Avatar.tsx + Avatar.module.css
     Badge.tsx + Badge.module.css
     Button.tsx + Button.module.css
     Card.tsx + Card.module.css
-    Modal.tsx + Modal.module.css
+    Checkbox.tsx + Checkbox.module.css
+    Dropdown.tsx + Dropdown.module.css
+    Icon.tsx + Icon.module.css
     Input.tsx + Input.module.css
-    Sidebar.tsx + Sidebar.module.css
+    Modal.tsx + Modal.module.css
     Navbar.tsx + Navbar.module.css
+    Radio.tsx + Radio.module.css
+    SegmentedControl.tsx + SegmentedControl.module.css
+    Sidebar.tsx + Sidebar.module.css
+    SidebarPanel.tsx + SidebarPanel.module.css
+    Switch.tsx + Switch.module.css
+    Tooltip.tsx + Tooltip.module.css
   timeline/
     DayCard.tsx + DayCard.module.css
   notes/
     NotesView.tsx + NotesView.module.css
   tasks/
     TasksView.tsx + TasksView.module.css
-    TaskSidebarPanel.tsx + TaskSidebarPanel.module.css
+    TaskItem.tsx + TaskItem.module.css
+    TaskPoolPanel.tsx + TaskPoolPanel.module.css
   finance/
     FinanceView.tsx + FinanceView.module.css
   weekly/

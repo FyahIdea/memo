@@ -58,15 +58,30 @@ memo/
 │   │
 │   ├── components/                 # UI components tái sử dụng
 │   │   ├── shared/                 # Dùng chung nhiều trang
-│   │   │   ├── Sidebar.tsx         # Navigation sidebar (desktop + mobile)
-│   │   │   └── Navbar.tsx          # (Prototype cũ, chưa dùng)
+│   │   │   ├── Alert.tsx           # Thông báo trạng thái
+│   │   │   ├── Avatar.tsx          # Hiển thị ảnh/icon user
+│   │   │   ├── Badge.tsx           # Label nhỏ
+│   │   │   ├── Button.tsx          # Nút bấm chung
+│   │   │   ├── Card.tsx            # Khung chứa nội dung
+│   │   │   ├── Checkbox.tsx        # Ô tick chọn
+│   │   │   ├── Dropdown.tsx        # Menu thả xuống
+│   │   │   ├── Icon.tsx            # Wrapper Material Symbols
+│   │   │   ├── Input.tsx           # Ô nhập liệu
+│   │   │   ├── Modal.tsx           # Overlay dialog
+│   │   │   ├── Navbar.tsx          # (Prototype cũ)
+│   │   │   ├── Radio.tsx           # Lựa chọn đơn
+│   │   │   ├── SegmentedControl.tsx# Chuyển đổi tab
+│   │   │   ├── Sidebar.tsx         # Navigation sidebar
+│   │   │   ├── SidebarPanel.tsx    # Base panel cho dạng slide
+│   │   │   ├── Switch.tsx          # Nút gạt
+│   │   │   └── Tooltip.tsx         # Hint text khi hover
 │   │   ├── timeline/
 │   │   │   └── DayCard.tsx         # Card hiển thị một ngày (events, tasks, notes)
 │   │   ├── notes/
 │   │   │   └── NotesView.tsx       # View quản lý notes & quick notes
 │   │   ├── tasks/
 │   │   │   ├── TasksView.tsx       # View quản lý tasks
-│   │   │   └── TaskSidebarPanel.tsx # Task pool sliding panel
+│   │   │   └── TaskPoolPanel.tsx   # Task pool panel (push sidebar)
 │   │   ├── finance/
 │   │   │   └── FinanceView.tsx     # View Finance (jars, goals, rewards...)
 │   │   └── weekly/

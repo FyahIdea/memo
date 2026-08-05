@@ -27,6 +27,9 @@ export interface TaskItemProps {
   onClick?: () => void; // Bấm vào task để xem chi tiết / cài đặt
   className?: string;
   disabled?: boolean;
+  disableStatusMenu?: boolean;
+  disableTitleEdit?: boolean;
+  variant?: 'default' | 'pool';
 }
 
 /* Hook Long Press */
@@ -68,6 +71,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onClick,
   className,
   disabled = false,
+  disableStatusMenu = false,
+  disableTitleEdit = false,
+  variant = 'default',
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
@@ -239,10 +245,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   const longPressProps = useLongPress(() => {
-    if (!disabled) setShowMenu(true);
+    if (!disabled && !disableStatusMenu) setShowMenu(true);
   }, 400);
 
-  const handleToggle = () => {
+  const handleToggle = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
     if (disabled) {
       playDisabledClick();
       setIsShaking(true);
@@ -254,7 +261,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       playTaskUncheck();
       onStatusChange?.('todo');
     } else {
-      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType));
+      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType as TaskType));
       playTaskDone();
       onStatusChange?.('done');
     }
@@ -265,7 +272,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     setShowMenu(false);
     if (next === status) return;
     if (next === 'done') {
-      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType));
+      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType as TaskType));
       playTaskDone();
     }
     else if (next === 'todo')   playTaskUncheck();
@@ -305,13 +312,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <div className={clsx(styles.swipeWrapper, className)}>
       {/* Background action (Delete) */}
-      <div className={styles.swipeBackground}>
-        {onRemove && (
+      {onRemove && (
+        <div className={styles.swipeBackground}>
           <button className={styles.swipeRemoveBtn} onClick={(e) => { e.stopPropagation(); onRemove(); }}>
             <Icon name="delete" filled />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div
         className={clsx(
@@ -332,8 +339,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         <button
           type="button"
           className={clsx(styles.checkbox, cbCfg.cls, isSquareCheckbox && styles.checkboxSquare)}
-          onClick={handleToggle}
-          {...longPressProps}
+          onClick={(e) => { e.stopPropagation(); handleToggle(e); }}
+          onMouseDown={(e) => { e.stopPropagation(); longPressProps.onMouseDown(e); }}
+          onMouseUp={(e) => { e.stopPropagation(); longPressProps.onMouseUp(e); }}
+          onMouseLeave={(e) => { e.stopPropagation(); longPressProps.onMouseLeave(e); }}
+          onTouchStart={(e) => { e.stopPropagation(); longPressProps.onTouchStart(e); }}
+          onTouchEnd={(e) => { e.stopPropagation(); longPressProps.onTouchEnd(e); }}
         >
           {cbCfg.icon && <Icon name={cbCfg.icon} size="sm" filled className={styles.checkIcon} />}
         </button>
@@ -365,10 +376,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       <div className={styles.mainContent}>
         
         {/* Tiêu đề + Ghi chú */}
-        <div className={clsx(styles.titleWrapper, isDone && styles.titleDone, isCancelled && styles.titleCancelled)}>
+        <div className={clsx(styles.titleWrapper, isDone && styles.titleDone, isCancelled && styles.titleCancelled, variant === 'pool' && styles.titleWrapperPool)}>
           <span 
-            className={styles.title}
-            contentEditable={!disabled}
+            className={clsx(styles.title, variant === 'pool' && styles.titlePool)}
+            contentEditable={!disabled && !disableTitleEdit && variant !== 'pool'}
             suppressContentEditableWarning={true}
             onBlur={(e) => {
               const newTitle = e.currentTarget.textContent || '';
@@ -392,29 +403,59 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             {displayTitle}
           </span>
           
-          <div className={styles.titleRightIcons}>
-            {renderNoteIcon()}
-            {renderRewardIcon()}
-            {renderPointsBadge()}
-          </div>
+          {variant === 'pool' && points !== undefined && (
+            <div className={styles.poolPointsBadge}>
+              <Icon name="stars" size="sm" filled /> {points}
+            </div>
+          )}
           
-          {/* ─── Cột phải: Actions & Điểm/Quà ─── */}
-          <div className={styles.rightActions}>
-            {showProgressBar && renderProgressBar()}
+          {variant !== 'pool' && (
+            <>
+              <div className={styles.titleRightIcons}>
+                {renderNoteIcon()}
+                {renderRewardIcon()}
+                {renderPointsBadge()}
+              </div>
+              
+              {/* ─── Cột phải: Actions & Điểm/Quà ─── */}
+              <div className={styles.rightActions}>
+                {showProgressBar && renderProgressBar()}
 
-            {onRemove && (
-              <Tooltip content="Remove task" position="top">
-                <button type="button" className={styles.removeBtn} onClick={onRemove}>
-                  <Icon name="close" size="sm" filled />
-                </button>
-              </Tooltip>
-            )}
-          </div>
+                {onRemove && (
+                  <Tooltip content="Remove task" position="top">
+                    <button type="button" className={styles.removeBtn} onClick={onRemove}>
+                      <Icon name="close" size="sm" filled />
+                    </button>
+                  </Tooltip>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Thời gian, Meta & Progress chung 1 dòng */}
-        {/* Thời gian, Meta & Progress chung 1 dòng */}
-        {hasMeta && (
+        {/* Cụm thông tin gọn gàng cho pool variant */}
+        {variant === 'pool' && (hasMeta || notes || reward) && (
+          <div className={styles.poolMetaRow}>
+            {reward && (
+              <span className={styles.poolMetaItem} style={{ color: 'var(--color-blue-dark)' }}>
+                <Icon name={rewardIcon} size="sm" filled /> {reward}
+              </span>
+            )}
+            {notes && (
+              <span className={styles.poolMetaItem}>
+                <Icon name="description" size="sm" filled /> Notes
+              </span>
+            )}
+            {deadline && (
+              <span className={styles.poolMetaItem}>
+                {deadline}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Thời gian, Meta & Progress chung 1 dòng (cho default variant) */}
+        {variant !== 'pool' && hasMeta && (
           <div className={styles.metaRow}>
             {deadline && (
               <span className={styles.metaText}>

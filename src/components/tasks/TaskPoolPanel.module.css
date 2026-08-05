@@ -1,0 +1,394 @@
+/* TaskPoolPanel.module.css */
+/* Panel "Kho Task" dạng push sidebar — khi mở đẩy main content sang trái */
+
+/* ─── Root container — đây là cốt lõi của "push" behavior ───── */
+/* Panel nằm trong flex row của .app, dùng width transition để đẩy content */
+.panel {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  flex-shrink: 0;           /* Không bị co lại */
+  width: 0;                 /* Mặc định đóng = không chiếm chỗ */
+  overflow: hidden;         /* Ẩn nội dung khi width = 0 */
+  transition: width 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  /* Không dùng position: fixed — nằm trong DOM flow bình thường nhưng dính trên màn hình */
+}
+
+/* Trạng thái mở: chiếm đúng 22rem */
+.panel--open {
+  width: 22rem;
+}
+
+/* ─── Header ──────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4);
+  flex-shrink: 0;
+  /* Đặt min-width để nội dung không bị ép vỡ khi panel đang animate */
+  min-width: 22rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+
+.headerIcon {
+  color: var(--color-warning);
+}
+
+/* Nút đóng panel */
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-primary);
+}
+
+/* Icon xoay khi hover nút đóng */
+.closeIcon {
+  transition: transform var(--transition-normal);
+}
+
+.closeBtn:hover .closeIcon {
+  transform: rotate(90deg);
+}
+
+
+
+/* ─── Thanh tìm kiếm ──────────────────────────────────────────── */
+.searchContainer {
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+  min-width: 22rem;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-alt);
+  transition: border-color var(--transition-fast);
+}
+
+.searchBar:focus-within {
+  border-color: var(--color-accent);
+}
+
+.searchIcon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Nút xoá tìm kiếm */
+.searchClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2em;
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.searchClear:hover {
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-primary);
+}
+
+/* ─── Filter pills ────────────────────────────────────────────── */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  min-width: 22rem;
+}
+
+/* Pill filter */
+.filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.3em 0.75em;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.filterPill:hover {
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-primary);
+}
+
+/* Pill đang active */
+.filterPill--active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+.filterPill--active:hover {
+  background-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+/* Số đếm trong pill */
+.filterCount {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+/* ─── Khu vực danh sách task (scrollable) ─────────────────────── */
+.taskList {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-3) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 22rem;
+}
+
+/* ─── Nhóm task (Pinned / Regular) ────────────────────────────── */
+.taskGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Label đầu nhóm */
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+/* Label nhóm Pinned — dùng màu vàng */
+.sectionLabel--pinned {
+  color: var(--color-yellow-dark);
+}
+
+.sectionCount {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* ─── Wrapper mỗi task (drag container) ──────────────────────── */
+.taskWrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-soft);
+  transition: background-color var(--transition-fast);
+  position: relative;
+  /* Bỏ nền hover mặc định, chỉ làm đậm border-bottom */
+}
+
+/* Đảm bảo divider được đậm lên khi hover dòng kẻ (dành cho pool task) */
+.taskWrapper:hover {
+  border-bottom-color: var(--color-border);
+}
+
+.dragHandle {
+  padding: 0 0.25rem;
+  cursor: grab;
+  color: var(--color-text-tertiary, #94a3b8);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.taskWrapper:hover .dragHandle {
+  color: var(--color-text-muted, #64748b);
+}
+
+/* ─── Trạng thái Kéo-Thả (Drag) ──────────────────────────────── */
+.isDraggingSource {
+  opacity: 0.3;
+}
+
+
+/* Task đang ghim — viền và nền vàng nhạt */
+.taskWrapper--pinned {
+  background-color: var(--color-warning-soft);
+  border-color: var(--color-warning-border);
+}
+
+.taskWrapper--pinned:hover {
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-soft);
+}
+
+/* ─── Icon kéo-thả ───────────────────────────────────────────── */
+.dragHandle {
+  color: var(--color-neutral-border, #e2e8f0);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: var(--space-2);
+  padding-right: var(--space-1);
+  cursor: grab;
+  font-size: 1.25rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.taskWrapper:hover .dragHandle {
+  color: var(--color-text-muted, #64748b);
+  transform: scale(1.15);
+}
+
+/* ─── TaskItem bên trong wrapper ─────────────────────────────── */
+.taskItemWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.poolTaskItem {
+  border-bottom: none !important;
+  background-color: transparent !important;
+}
+.poolTaskItem:hover {
+  border-bottom-color: transparent !important;
+}
+
+
+
+/* ─── Empty state ────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-text-muted);
+}
+
+.emptyTitle {
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.emptyDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+/* ─── Form thêm task (footer cố định) ────────────────────────── */
+.addFormWrapper {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+  min-width: 22rem;
+}
+
+.addForm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color var(--transition-fast);
+}
+
+.addForm:focus-within {
+  border-color: var(--color-accent);
+}
+
+.addInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  min-width: 0;
+}
+
+.addInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Select loại task */
+.addSelect {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0 var(--space-1);
+  flex-shrink: 0;
+}
