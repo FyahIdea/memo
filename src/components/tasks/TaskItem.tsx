@@ -24,6 +24,7 @@ export interface TaskItemProps {
   notes?: string;
   onStatusChange?: (status: TaskStatus) => void;
   onRemove?: () => void; // Bỏ khỏi ngày
+  onClick?: () => void; // Bấm vào task để xem chi tiết / cài đặt
   className?: string;
   disabled?: boolean;
 }
@@ -64,6 +65,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   notes,
   onStatusChange,
   onRemove,
+  onClick,
   className,
   disabled = false,
 }) => {
@@ -147,47 +149,91 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     );
   };
 
-  const renderPointsAndRewards = (wrapperClass?: string) => {
-    if (points === undefined && !reward) return null;
+  const renderPointsBadge = () => {
+    if (points === undefined) return null;
     return (
-      <div className={wrapperClass}>
-        {points !== undefined && (
-          <div className={styles.pointsBadge}>
-            <Icon name="stars" size="sm" filled /> {points}
-          </div>
-        )}
-
-        {reward && (
-          <Tooltip 
-            noPadding
-            position="top"
-            content={
-              <div className={styles.rewardRichTooltip}>
-                <div className={styles.rewardCover}>
-                  <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&h=200&fit=crop" alt="Reward Cover" />
-                </div>
-                <div className={styles.rewardBody}>
-                  <div className={styles.rewardAvatarBox}>
-                    <Icon name={rewardIcon} size="md" filled />
-                  </div>
-                  <div className={styles.rewardHeaderRow}>
-                    <span className={styles.rewardTitleText}>{reward}</span>
-                    <span className={styles.rewardPrice}>{rewardPrice || `★${points || 50}`}</span>
-                  </div>
-                  <div className={styles.rewardLocation}>
-                    <Icon name="storefront" size="sm" className={styles.storeIcon} />
-                    <span>Convenience Store</span>
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <div className={styles.rewardBadge}>
-              <Icon name="local_cafe" size="sm" filled className={styles.rewardIcon} />
-              <span className={styles.rewardText}>Reward</span>
+      <Tooltip
+        position="top"
+        content={
+          <div style={{ padding: '0.25rem', textAlign: 'center' }}>
+            <div style={{ fontWeight: 700, color: 'var(--color-blue-primary)', marginBottom: '0.25rem' }}>
+              Kho điểm: 1,250 <Icon name="stars" size="sm" />
             </div>
-          </Tooltip>
-        )}
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Hoàn thành task này để nhận thêm {points} điểm!
+            </div>
+          </div>
+        }
+      >
+        <div className={styles.pointsBadge}>
+          <Icon name="stars" size="sm" filled /> {points}
+        </div>
+      </Tooltip>
+    );
+  };
+
+  const renderRewardIcon = () => {
+    if (!reward) return null;
+    return (
+      <Tooltip 
+        noPadding
+        position="top"
+        content={
+          <div className={styles.rewardRichTooltip}>
+            <div className={styles.rewardCover}>
+              <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&h=200&fit=crop" alt="Reward Cover" />
+            </div>
+            <div className={styles.rewardBody}>
+              <div className={styles.rewardAvatarBox}>
+                <Icon name={rewardIcon} size="md" filled />
+              </div>
+              <div className={styles.rewardHeaderRow}>
+                <span className={styles.rewardTitleText}>{reward}</span>
+                <span className={styles.rewardPrice}>{rewardPrice || `★${points || 50}`}</span>
+              </div>
+              <div className={styles.rewardLocation}>
+                <Icon name="storefront" size="sm" className={styles.storeIcon} />
+                <span>Convenience Store</span>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <div className={styles.rewardIconWrap}>
+          <Icon name={rewardIcon} size="sm" filled className={styles.rewardIcon} />
+        </div>
+      </Tooltip>
+    );
+  };
+
+  const renderProgressBar = () => {
+    if (!subtasks || subtasks.total === 0) return null;
+    const { completed, total } = subtasks;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const remaining = total - completed;
+
+    // SVG r=6, circumference = 2 * Math.PI * 6 = 37.69911
+    const dashValue = (percent * 37.69911) / 100;
+
+    return (
+      <div className={styles.progressGroup}>
+        <div className={styles.craftPieWrapper}>
+          <svg className={styles.craftPieSvg} viewBox="0 0 32 32">
+            {/* Outer circle */}
+            <circle cx="16" cy="16" r="15" className={styles.craftPieTrack} />
+            {/* Pie Fill */}
+            <circle
+              cx="16"
+              cy="16"
+              r="6"
+              className={styles.craftPieFill}
+              strokeDasharray={`${dashValue} 37.69911`}
+            />
+          </svg>
+          {remaining > 0 && (
+            <div className={styles.craftPieBadge}>{remaining}</div>
+          )}
+        </div>
       </div>
     );
   };
@@ -208,6 +254,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       playTaskUncheck();
       onStatusChange?.('todo');
     } else {
+      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType));
       playTaskDone();
       onStatusChange?.('done');
     }
@@ -217,7 +264,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     e.stopPropagation();
     setShowMenu(false);
     if (next === status) return;
-    if (next === 'done')        playTaskDone();
+    if (next === 'done') {
+      import('../../utils/confetti').then(m => m.triggerTaskConfetti(taskType));
+      playTaskDone();
+    }
     else if (next === 'todo')   playTaskUncheck();
     else if (next === 'in_progress') playTaskInProgress();
     else if (next === 'cancelled')   playTaskCancelled();
@@ -250,7 +300,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const isCancelled = status === 'cancelled';
   const isFaded     = isDone || isCancelled;
 
-  const hasMeta = deadline || timeSpent || points !== undefined || reward || notes;
+  const hasMeta = deadline || timeSpent;
 
   return (
     <div className={clsx(styles.swipeWrapper, className)}>
@@ -263,9 +313,15 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         )}
       </div>
 
-      <div 
-        className={clsx(styles.taskItem, isFaded && styles.taskItemFaded, isShaking && 'shake-animation')}
-        style={{ transform: `translateX(${translateX}px)` }}
+      <div
+        className={clsx(
+          styles.taskItem,
+          isFaded && styles.taskItemFaded,
+          isShaking && 'shake-animation',
+          className
+        )}
+        onClick={onClick}
+        style={translateX !== 0 ? { transform: `translateX(${translateX}px)` } : undefined}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -335,59 +391,42 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           >
             {displayTitle}
           </span>
-          {renderNoteIcon(styles.desktopNoteIcon)}
+          
+          <div className={styles.titleRightIcons}>
+            {renderNoteIcon()}
+            {renderRewardIcon()}
+            {renderPointsBadge()}
+          </div>
+          
+          {/* ─── Cột phải: Actions & Điểm/Quà ─── */}
+          <div className={styles.rightActions}>
+            {showProgressBar && renderProgressBar()}
+
+            {onRemove && (
+              <Tooltip content="Remove task" position="top">
+                <button type="button" className={styles.removeBtn} onClick={onRemove}>
+                  <Icon name="close" size="sm" filled />
+                </button>
+              </Tooltip>
+            )}
+          </div>
         </div>
 
         {/* Thời gian, Meta & Progress chung 1 dòng */}
-        {(showProgressBar || hasMeta) && (
+        {/* Thời gian, Meta & Progress chung 1 dòng */}
+        {hasMeta && (
           <div className={styles.metaRow}>
-            {showProgressBar && (
-              <>
-                {/* Desktop Progress Bar */}
-                <div className={clsx(styles.progressGroup, styles.desktopProgress)}>
-                  <div className={styles.progressBarWrap}>
-                    <div className={styles.progressBarFill} style={{ width: `${percent}%` }} />
-                  </div>
-                  <span className={styles.progressText}>{subtaskText}</span>
-                </div>
-                {/* Mobile Progress Ring */}
-                <div className={clsx(styles.progressGroup, styles.mobileProgress)}>
-                  <div className={styles.progressRingWrapper}>
-                    <svg className={styles.progressSvg} viewBox="0 0 36 36">
-                      <path
-                        className={styles.progressTrack}
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className={styles.progressArc}
-                        strokeDasharray={`${percent}, 100`}
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <span className={styles.progressRingText}>{subtaskText}</span>
-                  </div>
-                </div>
-              </>
+            {deadline && (
+              <span className={styles.metaText}>
+                {deadline}
+              </span>
             )}
-            
-            {deadline && <span className={styles.metaText}>{deadline}</span>}
-            {timeSpent && <span className={styles.metaText}>{timeSpent}</span>}
-            {renderNoteIcon(styles.mobileNoteIcon)}
-            {renderPointsAndRewards(styles.mobilePoints)}
+            {timeSpent && (
+              <span className={styles.metaText}>
+                {timeSpent}
+              </span>
+            )}
           </div>
-        )}
-      </div>
-
-      {/* ─── Cột phải: Actions & Điểm/Quà ─── */}
-      <div className={styles.rightActions}>
-        {renderPointsAndRewards(styles.desktopPoints)}
-
-        {onRemove && (
-          <Tooltip content="Remove task" position="top">
-            <button type="button" className={styles.removeBtn} onClick={onRemove}>
-              <Icon name="close" size="sm" filled />
-            </button>
-          </Tooltip>
         )}
       </div>
       </div>

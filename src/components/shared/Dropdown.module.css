@@ -1,0 +1,144 @@
+/* Dropdown.module.css */
+/* Component menu thả xuống cho các hành động/lựa chọn */
+
+/* ─── Container ───────────────────────────────────────────── */
+.container {
+  position: relative;
+  display: inline-block;
+  min-width: 14rem;
+}
+
+.container--fullWidth {
+  display: block;
+  width: 100%;
+}
+
+.triggerWrapper {
+  display: inline-flex;
+  cursor: pointer;
+  width: 100%;
+}
+.container--fullWidth .triggerWrapper {
+  display: flex;
+}
+
+/* ─── Default Field-like Trigger ──────────────────────────── */
+.defaultTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-normal), transform var(--transition-fast);
+}
+
+/* Hiệu ứng hover cho dropdown trigger: Chỉ đậm viền một xíu khi hover, không áp dụng khi active */
+@media (hover: hover) {
+  .defaultTrigger:hover:not(:active) {
+    border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-text-muted));
+  }
+}
+
+.defaultTrigger:active {
+  transform: scale(0.98);
+}
+
+.triggerLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.caret {
+  color: var(--color-text-muted);
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), color var(--transition-fast);
+  margin-left: var(--space-2);
+}
+
+.caret--open {
+  transform: rotate(180deg);
+  color: var(--color-text-primary); /* Đổi sang màu chữ chính khi mở, không dùng màu blue */
+}
+
+/* ─── Menu Dropdown ───────────────────────────────────────── */
+.menu {
+  position: absolute;
+  top: calc(100% + 0.375rem); /* Cách field một chút */
+  width: 100%; /* Độ dài bằng phần field */
+  min-width: 12rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 0.5rem;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  animation: menuIn var(--transition-fast) ease;
+  transform-origin: top center;
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* Căn chỉnh của menu */
+.menu--align-left {
+  left: 0;
+}
+
+.menu--align-right {
+  right: 0;
+}
+
+/* ─── Item trong menu ─────────────────────────────────────── */
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  text-align: left;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  background-color: transparent;
+  transition: background-color var(--transition-fast);
+}
+
+.item:hover:not(.item--disabled) {
+  background-color: var(--color-surface-alt);
+}
+
+.itemIcon {
+  color: var(--color-text-secondary);
+}
+
+/* Trạng thái nguy hiểm (Danger) */
+.item--danger {
+  color: var(--color-danger);
+}
+.item--danger .itemIcon {
+  color: var(--color-danger);
+}
+.item--danger:hover:not(.item--disabled) {
+  background-color: var(--color-danger-soft);
+}
+
+/* Trạng thái vô hiệu hóa (Disabled) */
+.item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

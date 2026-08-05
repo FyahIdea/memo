@@ -1,18 +1,16 @@
-/* Modal.module.css */
-/* Overlay dialog — dùng làm base cho mọi modal trong app */
+/* SidebarPanel.module.css */
+/* Component ngăn kéo trượt ra từ bên phải */
 
 /* ─── Overlay backdrop ────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--layout-padding);
-  background-color: rgb(15 23 42 / 0.4);   /* slate-900/40 */
+  background-color: rgb(15 23 42 / 0.4); /* slate-900/40 */
   backdrop-filter: blur(2px);
   animation: overlayIn var(--transition-fast) ease;
+  display: flex;
+  justify-content: flex-end;
 }
 
 @keyframes overlayIn {
@@ -29,60 +27,52 @@
   animation: overlayOut 150ms ease forwards;
 }
 
-/* ─── Dialog panel ────────────────────────────────────────── */
-.dialog {
+/* ─── Panel ───────────────────────────────────────────────── */
+.panel {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  width: 100%;
-  max-height: calc(100dvh - 4rem);
-  padding: var(--space-4);
-  overflow-y: auto;
+  border-left: 1px solid var(--color-border);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  animation: dialogIn var(--transition-normal) ease;
+  animation: panelIn 350ms cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
 }
 
-@keyframes dialogIn {
+@keyframes panelIn {
   from {
-    opacity: 0;
-    transform: translateY(2rem);
+    transform: translateX(100%);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-@keyframes dialogOut {
+@keyframes panelOut {
   from {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
   to {
-    opacity: 0;
-    transform: translateY(2rem);
+    transform: translateX(100%);
   }
 }
 
-.dialog.closing {
-  animation: dialogOut 150ms cubic-bezier(0.3, 0, 0.8, 0.15) forwards;
+.panel.closing {
+  animation: panelOut 150ms cubic-bezier(0.3, 0, 0.8, 0.15) forwards;
 }
 
-/* ─── Size variants ───────────────────────────────────────── */
-.dialog--sm { max-width: 24rem; }   /* 384px */
-.dialog--md { max-width: 32rem; }   /* 512px — mặc định */
-.dialog--lg { max-width: 48rem; }   /* 768px */
+/* ─── Width variants ──────────────────────────────────────── */
+.panel--sm { width: 100%; max-width: 20rem; }   /* 320px */
+.panel--md { width: 100%; max-width: 24rem; }   /* 384px — mặc định */
+.panel--lg { width: 100%; max-width: 32rem; }   /* 512px */
+.panel--xl { width: 100%; max-width: 40rem; }   /* 640px */
 
-/* ─── Header ──────────────────────────────────────────────── */
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-5) var(--space-8);
   border-bottom: 1px solid var(--color-border-soft);
   flex-shrink: 0;
-  gap: var(--space-4);
 }
 
 .headerContent {
@@ -102,7 +92,7 @@
 }
 
 .title {
-  font-size: var(--text-h3);
+  font-size: var(--text-md);
   font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   line-height: var(--leading-tight);
@@ -110,7 +100,7 @@
 
 .description {
   font-size: var(--text-small);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .closeBtn {
@@ -122,7 +112,6 @@
   cursor: pointer;
   background: transparent;
   border: none;
-  margin-top: -0.25em; /* Căn chỉnh nhẹ với title */
   margin-right: -0.25em;
 }
 .closeBtn:hover {
@@ -139,14 +128,14 @@
 
 /* ─── Body ────────────────────────────────────────────────── */
 .body {
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-6) var(--space-8);
   flex: 1;
   overflow-y: auto;
 }
 
 /* ─── Footer ──────────────────────────────────────────────── */
 .footer {
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-5) var(--space-8);
   border-top: 1px solid var(--color-border-soft);
   display: flex;
   align-items: center;

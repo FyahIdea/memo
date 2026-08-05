@@ -382,3 +382,114 @@ export function playDisabledClick() {
     osc.stop(now + 0.1);
   } catch {}
 }
+
+/**
+ * Very short, crisp, subtle tick suitable for segmented controls or light interactions.
+ */
+export function playSoftClick() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.02);
+    
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.02);
+  } catch {}
+}
+
+/**
+ * A wooden, hollow tap sound. Good for solid slider clicks or dropping items.
+ */
+export function playWoodTap() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.04);
+    
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.04);
+  } catch {}
+}
+
+/**
+ * Fast, magical arpeggio for achieving a big milestone or unlocking something.
+ */
+export function playMagicSparkle() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [800, 1200, 1600, 2400];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.04);
+      
+      gain.gain.setValueAtTime(0, now + i * 0.04);
+      gain.gain.linearRampToValueAtTime(0.05, now + i * 0.04 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.1);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(now + i * 0.04);
+      osc.stop(now + i * 0.04 + 0.1);
+    });
+  } catch {}
+}
+
+/**
+ * Soft, low buzz indicating an error or forbidden action.
+ */
+export function playErrorBuzzer() {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.linearRampToValueAtTime(130, now + 0.15);
+    
+    gain.gain.setValueAtTime(0.05, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  } catch {}
+}

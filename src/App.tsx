@@ -15,11 +15,11 @@ const AppRouter: React.FC = () => {
   return (
     <MainLayout>
       {activeTab === 'timeline' && <TimelinePage />}
-      {activeTab === 'notes'    && <NotesPage />}
-      {activeTab === 'tasks'    && <TasksPage />}
-      {activeTab === 'finance'  && <FinancePage />}
-      {activeTab === 'weekly'   && <WeeklyPage />}
-      {activeTab === 'design'   && <DesignSystemPage />}
+      {activeTab === 'notes' && <NotesPage />}
+      {activeTab === 'tasks' && <TasksPage />}
+      {activeTab === 'finance' && <FinancePage />}
+      {activeTab === 'weekly' && <WeeklyPage />}
+      {activeTab === 'design' && <DesignSystemPage />}
     </MainLayout>
   );
 };

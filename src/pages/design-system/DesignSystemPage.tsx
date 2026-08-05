@@ -12,11 +12,16 @@ import { Switch } from '../../components/shared/Switch';
 import { Avatar } from '../../components/shared/Avatar';
 import { Alert } from '../../components/shared/Alert';
 import { TaskItem, TaskStatus } from '../../components/tasks/TaskItem';
+import { Dropdown } from '../../components/shared/Dropdown';
+import { SidebarPanel } from '../../components/shared/SidebarPanel';
+import { SegmentedControl } from '../../components/shared/SegmentedControl';
 
 const DesignSystemPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarPanelOpen, setIsSidebarPanelOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [demoTaskStatus, setDemoTaskStatus] = useState<TaskStatus>('todo');
+  const [segmentValue, setSegmentValue] = useState('daily');
 
   const colors = [
     { name: 'Red Dark', var: 'var(--color-red-dark)' },
@@ -210,9 +215,9 @@ const DesignSystemPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Cards & Modals Section */}
+      {/* Cards, Modals & Panels Section */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Cards & Modals</h2>
+        <h2 className={styles.sectionTitle}>Cards, Modals & Panels</h2>
         <div className={styles.flexRow}>
           <div className={styles.cardPreview}>
             <Card hoverable padding="lg">
@@ -233,6 +238,58 @@ const DesignSystemPage: React.FC = () => {
               Open Demo Modal
             </Button>
           </Card>
+
+          <Card padding="md">
+            <h3 style={{ marginBottom: 'var(--space-3)' }}>Sidebar Panel</h3>
+            <Button variant="secondary" onClick={() => setIsSidebarPanelOpen(true)}>
+              Open Sidebar Panel
+            </Button>
+          </Card>
+        </div>
+      </section>
+
+      {/* Navigation & Menus Section */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Navigation & Menus</h2>
+        <div className={styles.flexRow} style={{ alignItems: 'flex-start' }}>
+          <div style={{ 
+            display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start',
+            backgroundColor: 'var(--color-surface)', padding: '1rem', borderRadius: 'var(--radius-xl)'
+          }}>
+            <h3 style={{ fontSize: 'var(--text-p)', color: 'var(--color-text-secondary)' }}>Segmented Control</h3>
+            <SegmentedControl 
+              value={segmentValue} 
+              onChange={setSegmentValue}
+              options={[
+                { label: 'Daily', value: 'daily', icon: 'today' },
+                { label: 'Weekly', value: 'weekly', icon: 'date_range' },
+                { label: 'Monthly', value: 'monthly', icon: 'calendar_month' }
+              ]}
+            />
+            <SegmentedControl 
+              value={segmentValue} 
+              onChange={setSegmentValue}
+              size="sm"
+              options={[
+                { label: 'Daily', value: 'daily' },
+                { label: 'Weekly', value: 'weekly' },
+              ]}
+            />
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start', minWidth: '16rem' }}>
+            <h3 style={{ fontSize: 'var(--text-p)', color: 'var(--color-text-secondary)' }}>Dropdown Menu</h3>
+            <Dropdown 
+              label="Options Menu"
+              fullWidth
+              items={[
+                { id: '1', label: 'Edit', icon: 'edit', onClick: () => console.log('edit') },
+                { id: '2', label: 'Duplicate', icon: 'content_copy', onClick: () => console.log('duplicate') },
+                { id: '3', label: 'Share', icon: 'share', disabled: true, onClick: () => console.log('share') },
+                { id: '4', label: 'Delete', icon: 'delete', danger: true, onClick: () => console.log('delete') },
+              ]}
+            />
+          </div>
         </div>
       </section>
 
@@ -289,7 +346,8 @@ const DesignSystemPage: React.FC = () => {
             rewardIcon="local_cafe"
             rewardPrice="$3.00"
             deadline="Today, 23:59"
-            subtasks={{ completed: 2, total: 5 }}
+            timeSpent="45m"
+            subtasks={{ completed: 8, total: 24 }}
             isPinned={true}
             onRemove={() => console.log('remove')}
             notes="Nhớ check lại các component UI có ngữ nghĩa (không dùng badge nhàm chán). Chú ý: Hãy thử ấn giữ (long press) vào ô checkbox để mở menu tuỳ chọn."
@@ -356,6 +414,24 @@ const DesignSystemPage: React.FC = () => {
           <InputField opticalAlign={true} label="Name" placeholder="Enter your name" />
         </div>
       </Modal>
+
+      {/* Sidebar Panel Demo */}
+      <SidebarPanel
+        isOpen={isSidebarPanelOpen}
+        onClose={() => setIsSidebarPanelOpen(false)}
+        title="Settings Panel"
+        description="Manage your preferences and configurations."
+        icon="settings"
+        footer={
+          <Button color="blue" onClick={() => setIsSidebarPanelOpen(false)}>Save Changes</Button>
+        }
+      >
+        <p>This is the sidebar panel body. It slides in from the right edge of the screen.</p>
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <InputField label="Username" placeholder="Enter username" />
+          <Switch label="Enable notifications" defaultChecked />
+        </div>
+      </SidebarPanel>
     </div>
   );
 };

@@ -44,7 +44,6 @@
   position: relative;
   background-color: var(--color-bg-base, #ffffff);
   transition: transform 0.2s ease-out, background-color 0.2s;
-  z-index: 1;
 }
 
 
@@ -57,7 +56,7 @@
 /* CHÚ Ý: KHÔNG set opacity lên thẻ cha .taskItem hoặc .mainContent 
    vì sẽ làm mờ cả Tooltip bên trong. Chỉ làm mờ cụ thể chữ và icon */
 .taskItemFaded .checkbox,
-.taskItemFaded .title,
+.taskItemFaded .title:not(:focus),
 .taskItemFaded .metaText,
 .taskItemFaded .notesIconWrap,
 .taskItemFaded .pointsBadge,
@@ -73,7 +72,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -1px; /* Căn chỉnh hoàn hảo với tâm của text (line-height 1.4) */
+  margin-top: 1px; /* Align perfectly with text center */
   flex-shrink: 0;
   position: relative;
   /* Để định vị statusMenu */
@@ -96,11 +95,13 @@
 }
 
 @media (hover: hover) {
+  /* Tạm thời ẩn nút play khi hover theo yêu cầu */
+  /*
   .taskItem:hover .checkboxArea::before {
     opacity: 1;
     left: -1.5rem;
-    /* Trượt vào nhưng giữ một khoảng cách an toàn với checkbox */
   }
+  */
 }
 
 /* Mặc định checkbox là hình TRÒN (cho quick task) */
@@ -263,7 +264,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0;
   /* Cách nhau xíu xiu */
 }
 
@@ -278,6 +279,15 @@
   line-height: 1.4;
 }
 
+.titleRightIcons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-left: 1px solid var(--color-border);
+  padding-left: 0.5rem;
+  margin-left: 0.25rem;
+}
+
 .title {
   font-size: var(--text-base);
   font-weight: 700;
@@ -285,10 +295,29 @@
   /* Để title tự cắt gọn nếu quá dài, còn notesTooltip thì không bị co */
   flex-shrink: 1;
   min-width: 0;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
+  white-space: normal;
+  word-break: break-word;
+  /* Hover & Focus effects for editable title */
+  cursor: text;
+  border-bottom: 1px dashed transparent;
+  padding-bottom: 1px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .title:hover {
+    border-bottom-color: var(--color-text-muted);
+  }
+}
+
+.title:focus {
+  border-bottom-color: var(--color-text-muted);
 }
 
 .titleDone .title,
@@ -296,6 +325,12 @@
   text-decoration: line-through;
   text-decoration-thickness: 2px;
   color: var(--color-text-muted);
+}
+
+.titleDone .title:focus,
+.titleCancelled .title:focus {
+  text-decoration: none;
+  color: var(--color-text-primary);
 }
 
 .titleDone .notesIconWrap,
@@ -319,14 +354,14 @@
 }
 
 .notesIconGrey {
-  color: var(--color-text-muted);
+  color: var(--color-neutral-border);
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform: rotate(-15deg);
+  transform: rotate(0deg);
 }
 
 @media (hover: hover) {
   .notesIconWrap:hover .notesIconGrey {
-    transform: rotate(0deg);
+    transform: rotate(15deg);
     color: var(--color-blue-primary);
   }
 }
@@ -369,55 +404,75 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.progressBarWrap {
-  width: 80px;
-  /* Ngắn lại một chút */
-  height: 6px;
-  /* Trả về độ dày ban đầu */
-  background-color: var(--color-blue-bg);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progressBarFill {
-  height: 100%;
-  background-color: var(--color-blue-primary);
-  border-radius: var(--radius-full);
-  transition: width 0.3s ease;
-}
-
-.progressRingWrapper {
+.craftPieWrapper {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
-.progressRingText {
+.craftPieSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.craftPieTrack {
+  fill: transparent;
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.craftPieFill {
+  fill: transparent;
+  stroke: var(--color-border);
+  stroke-width: 12;
+  transition: stroke-dasharray 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+.craftPieBadge {
   position: absolute;
-  font-size: 0.55rem;
+  bottom: -4px;
+  right: -4px;
+  background-color: var(--color-blue-primary);
+  color: white;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--color-blue-primary);
+  border-radius: var(--radius-full);
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid var(--color-surface);
 }
 
 .progressText {
   font-size: var(--text-small);
-  color: var(--color-blue-primary);
-  font-weight: 700;
+  color: var(--color-text-muted);
+  font-weight: 500;
 }
-
 /* Metadata nằm cùng 1 dòng mỏng mảnh phía dưới */
 .metaRow {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-top: 0.2rem;
+  margin-top: -1px;
 }
 
 /* Thời gian, thông tin phụ */
 .metaText {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: var(--text-small);
   color: var(--color-text-muted);
   font-weight: 500;
@@ -430,38 +485,47 @@
   gap: var(--space-3);
   margin-left: auto;
   padding-left: var(--space-2);
-  margin-top: 2px;
-  /* Đồng bộ với title */
+  margin-top: 0;
+  max-height: 20px; /* Ngăn không cho cột này làm giãn chiều cao của row title */
 }
 
+/* Points Badge */
 .pointsBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  font-size: var(--text-small);
-  font-weight: 700;
-  color: var(--color-yellow-primary);
-}
-
-/* Reward Badge */
-.rewardBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.15rem;
   padding: 0.15rem 0.6rem;
   background-color: var(--color-surface);
   border-radius: var(--radius-full);
   font-size: var(--text-small);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-yellow-primary);
   border: 1px solid var(--color-border);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 @media (hover: hover) {
-  .rewardBadge:hover {
-    background-color: var(--color-surface-alt);
+  .pointsBadge:hover {
+    border-color: var(--color-yellow-primary);
+  }
+}
+
+/* Reward Icon (No Badge) */
+.rewardIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  color: var(--color-neutral-border);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .rewardIconWrap:hover {
+    transform: translateY(-3px);
+    color: var(--color-blue-primary);
   }
 }
 
@@ -570,27 +634,7 @@
   }
 }
 
-.progressSvg {
-  width: 2rem;
-  height: 2rem;
-  transform: rotate(-90deg);
-}
-
-.progressTrack {
-  stroke: var(--color-blue-bg);
-  fill: none;
-  stroke-width: 5;
-  /* Viền dày rõ ràng */
-}
-
-.progressArc {
-  stroke: var(--color-blue-primary);
-  /* Có thể đổi màu progress ring nếu muốn */
-  fill: none;
-  stroke-width: 5;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}/* Points & Rewards Responsive Wrappers */
+/* Points & Rewards Responsive Wrappers */
 .desktopPoints {
   display: flex;
   gap: var(--space-2);
@@ -599,12 +643,9 @@
   display: none !important;
 }
 
-.mobileProgress {
-  display: none !important;
-}
 
 .rewardIcon {
-  color: var(--color-text-muted);
+  color: inherit;
 }
 
 /* ─── Responsive for Mobile ─── */
@@ -617,16 +658,6 @@
     display: none !important;
   }
   
-  .mobileProgress {
-    display: flex !important;
-  }
-  
-  .desktopNoteIcon {
-    display: none !important;
-  }
-  .mobileNoteIcon {
-    display: flex !important;
-  }
   
   .desktopPoints {
     display: none !important;
@@ -657,11 +688,42 @@
   }
 }
 
-/* Note Icons */
-.desktopNoteIcon {
+/* Settings Button */
+.settingsBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast), color var(--transition-fast);
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.mobileNoteIcon {
-  display: none !important;
+
+.settingsBtn > * {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (hover: hover) {
+  .settingsBtn:hover {
+    color: var(--color-blue-primary);
+  }
+  
+  .settingsBtn:hover > * {
+    transform: rotate(90deg);
+  }
+  
+  .titleWrapper:hover .settingsBtn {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .settingsBtn {
+    opacity: 1;
+  }
 }
 

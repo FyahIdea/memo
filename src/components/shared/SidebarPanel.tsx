@@ -1,44 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import styles from './Modal.module.css';
-import { Button } from './Button';
+import styles from './SidebarPanel.module.css';
 import { Icon } from './Icon';
 
-export type ModalSize = 'sm' | 'md' | 'lg';
+export type SidebarPanelWidth = 'sm' | 'md' | 'lg' | 'xl';
 
-interface ModalProps {
+interface SidebarPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  icon?: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
-  size?: ModalSize;
+  icon?: string;
   children: React.ReactNode;
-  /** Nội dung footer (thường là các nút hành động) */
   footer?: React.ReactNode;
   className?: string;
+  width?: SidebarPanelWidth;
 }
 
 /**
- * Modal — base overlay dialog, dùng cho mọi loại popup trong app.
- * Tự đóng khi nhấn Escape.
- *
- * @example
- * <Modal isOpen={open} onClose={onClose} title="Add Task">
- *   <form>...</form>
- * </Modal>
+ * SidebarPanel — component hiển thị dạng ngăn kéo trượt ra từ bên phải.
+ * Thích hợp cho việc xem chi tiết, form nhập liệu hoặc cài đặt mà không rời trang.
  */
-export const Modal: React.FC<ModalProps> = ({
+export const SidebarPanel: React.FC<SidebarPanelProps> = ({
   isOpen,
   onClose,
-  icon,
   title,
   description,
-  size = 'md',
+  icon,
   children,
   footer,
   className,
+  width = 'md',
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -52,12 +46,12 @@ export const Modal: React.FC<ModalProps> = ({
       const timer = setTimeout(() => {
         setIsRendered(false);
         setIsClosing(false);
-      }, 150); // 150ms
+      }, 150); // Nhanh hơn: 150ms
       return () => clearTimeout(timer);
     }
   }, [isOpen, isRendered]);
 
-  // Đóng modal khi nhấn Escape
+  // Đóng panel khi nhấn Escape
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -75,16 +69,18 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isRendered) return null;
 
   return (
-    <div
-      className={clsx(styles.overlay, isClosing && styles.closing)}
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
+    <div 
+      className={clsx(styles.overlay, isClosing && styles.closing)} 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
     >
-      <div
-        className={clsx(styles.dialog, styles[`dialog--${size}`], className, isClosing && styles.closing)}
+      <div 
+        ref={panelRef}
+        className={clsx(styles.panel, styles[`panel--${width}`], className, isClosing && styles.closing)}
         role="dialog"
         aria-modal="true"
       >
-        {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.titleRow}>
@@ -93,7 +89,7 @@ export const Modal: React.FC<ModalProps> = ({
             </div>
             {description && <span className={styles.description}>{description}</span>}
           </div>
-          <button className={styles.closeBtn} onClick={handleClose} aria-label="Đóng">
+          <button className={styles.closeBtn} onClick={handleClose} aria-label="Đóng panel">
             <Icon name="close" size="md" className={styles.closeIcon} />
           </button>
         </div>
