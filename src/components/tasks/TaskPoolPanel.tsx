@@ -20,6 +20,7 @@ import { Icon } from "../shared/Icon";
 import { Button } from "../shared/Button";
 import { Tooltip } from "../shared/Tooltip";
 import { InputField } from "../shared/Input";
+import { formatDateTimeCustom } from "../../utils/helpers";
 import {
   playPop,
   playTaskDone,
@@ -240,7 +241,8 @@ export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
       className={clsx(
         styles.row,
         isDragging && styles["row--dragging"],
-        isOverlay && styles["row--overlay"]
+        isOverlay && styles["row--overlay"],
+        (isDone || isCancelled) && styles.rowFaded
       )}
       onClick={() => {
         if (!showMenu) onSelect?.();
@@ -320,13 +322,7 @@ export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
                   <Icon name="check_circle" filled size="md" />
                   <span>Hoàn thành</span>
                 </button>
-                <button
-                  className={clsx(styles.menuItem, styles.menuInProgress)}
-                  onClick={(e) => handlePickStatus(e, "in_progress")}
-                >
-                  <Icon name="schedule" filled size="md" />
-                  <span>Đang làm</span>
-                </button>
+
                 <button
                   className={clsx(styles.menuItem, styles.menuCancelled)}
                   onClick={(e) => handlePickStatus(e, "cancelled")}
@@ -350,17 +346,35 @@ export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
 
       {/* Nội dung */}
       <div className={styles.body}>
-        <div
-          className={clsx(
-            styles.title,
-            (isDone || isCancelled) && styles.titleDone,
-          )}
-        >
-          {/* Ô vuông nhỏ chỉ loại task nằm inline ngay trong title */}
-          <Tooltip content={`${cat.label} task`} position="top">
-            <span className={clsx(styles.catSquare, cat.squareCls)} />
-          </Tooltip>
-          {task.title}
+        <div className={styles.titleRow}>
+          <div
+            className={clsx(
+              styles.title,
+              (isDone || isCancelled) && styles.titleDone,
+            )}
+          >
+            {/* Ô vuông nhỏ chỉ loại task nằm inline ngay trong title */}
+            <Tooltip content={`${cat.label} task`} position="top">
+              <span className={clsx(styles.catSquare, cat.squareCls)} />
+            </Tooltip>
+            {task.title}
+          </div>
+
+          {/* Cột phải: điểm + số ngày + ghim (Chuyển vào đây để metaRow trải dài ở dưới) */}
+          <div className={styles.badges}>
+            {task.points !== undefined && (
+              <div className={clsx(styles.badge, styles.badgePoints)}>
+                <Icon name="stars" size="sm" filled />
+                <span>{task.points}</span>
+              </div>
+            )}
+            <Tooltip content={`Đang gắn vào ${linkedDays} ngày`} position="left">
+              <div className={clsx(styles.badge, styles.badgeDays)}>
+                <Icon name="calendar_today" size="sm" />
+                <span>{linkedDays}</span>
+              </div>
+            </Tooltip>
+          </div>
         </div>
 
         {(durationText || task.deadline) && (
@@ -368,7 +382,7 @@ export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
             {task.deadline && (
               <span className={styles.metaItem}>
                 <Icon name="flag" size="sm" filled className={styles.metaIcon} />
-                {task.deadline}
+                {formatDateTimeCustom(task.deadline)}
               </span>
             )}
             {durationText && (
@@ -392,22 +406,6 @@ export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
             )}
           </div>
         )}
-      </div>
-
-      {/* Cột phải: điểm + số ngày + ghim */}
-      <div className={styles.badges}>
-        {task.points !== undefined && (
-          <div className={clsx(styles.badge, styles.badgePoints)}>
-            <Icon name="stars" size="sm" filled />
-            <span>{task.points}</span>
-          </div>
-        )}
-        <Tooltip content={`Đang gắn vào ${linkedDays} ngày`} position="left">
-          <div className={clsx(styles.badge, styles.badgeDays)}>
-            <Icon name="calendar_today" size="sm" />
-            <span>{linkedDays}</span>
-          </div>
-        </Tooltip>
       </div>
     </div>
   );
@@ -464,8 +462,11 @@ export const TaskPoolPanel: React.FC<TaskPoolPanelProps> = ({
 
   // ─── State cuộn hàng filter ───────────────────────────────
   const filterScrollRef = useRef<HTMLDivElement>(null);
+  const taskListRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [canScrollTaskTop, setCanScrollTaskTop] = useState(false);
+  const [canScrollTaskBottom, setCanScrollTaskBottom] = useState(false);
 
   // Map id → tên tag (lấy từ AppContext)
   const tagLookup = useMemo(() => {
@@ -539,11 +540,23 @@ export const TaskPoolPanel: React.FC<TaskPoolPanelProps> = ({
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   }, []);
 
+  const updateTaskScrollState = useCallback(() => {
+    const el = taskListRef.current;
+    if (!el) return;
+    setCanScrollTaskTop(el.scrollTop > 1);
+    setCanScrollTaskBottom(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+  }, []);
+
   useEffect(() => {
     updateScrollState();
+    updateTaskScrollState();
     window.addEventListener("resize", updateScrollState);
-    return () => window.removeEventListener("resize", updateScrollState);
-  }, [updateScrollState, tasks.length, filter]);
+    window.addEventListener("resize", updateTaskScrollState);
+    return () => {
+      window.removeEventListener("resize", updateScrollState);
+      window.removeEventListener("resize", updateTaskScrollState);
+    };
+  }, [updateScrollState, updateTaskScrollState, tasks.length, filter]);
 
   const scrollFilters = (dir: number) => {
     filterScrollRef.current?.scrollBy({ left: dir * 140, behavior: "smooth" });
@@ -712,8 +725,19 @@ export const TaskPoolPanel: React.FC<TaskPoolPanelProps> = ({
       </div>
 
       {/* ─── Danh sách task ─────────────────────────────────── */}
-      <div className={styles.taskList}>
-        {filteredTasks.length === 0 ? (
+      <div className={styles.taskListWrapper}>
+        <div 
+          className={clsx(styles.scrollOverlay, styles.scrollOverlayTop, canScrollTaskTop && styles['scrollOverlay--on'])}
+        />
+        <div 
+          className={clsx(styles.scrollOverlay, styles.scrollOverlayBottom, canScrollTaskBottom && styles['scrollOverlay--on'])}
+        />
+        <div 
+          className={styles.taskList} 
+          ref={taskListRef} 
+          onScroll={updateTaskScrollState}
+        >
+          {filteredTasks.length === 0 ? (
           <div className={styles.emptyState}>
             <Icon name="inventory_2" size="xl" className={styles.emptyIcon} />
             <p className={styles.emptyTitle}>Không có task</p>
@@ -737,6 +761,7 @@ export const TaskPoolPanel: React.FC<TaskPoolPanelProps> = ({
             />
           ))
         )}
+        </div>
       </div>
 
       {/* ─── Form thêm task (footer) ────────────────────────── */}

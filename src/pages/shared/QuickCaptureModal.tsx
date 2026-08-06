@@ -285,7 +285,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
             <div className={styles.inlineRow}>
               <span className={styles.inlineLabel}>Optional Deadline:</span>
               <input
-                type="date"
+                type="datetime-local"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 style={{

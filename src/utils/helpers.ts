@@ -71,3 +71,32 @@ export function getTypeBadge(type: ObjectType): { label: string; color: string }
     case 'reward': return { label: 'Reward', color: 'bg-yellow-500/10 text-yellow-600' };
   }
 }
+
+export function formatDateTimeCustom(isoStr: string): string {
+  if (!isoStr) return '';
+  try {
+    const hasTime = isoStr.includes('T');
+    const parseStr = hasTime ? isoStr : `${isoStr}T00:00:00`;
+    const date = new Date(parseStr);
+    
+    if (isNaN(date.getTime())) return isoStr;
+    
+    const datePart = date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric'
+    });
+    
+    if (!hasTime) return datePart;
+    
+    const timePart = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(' ', '');
+    
+    return `${datePart} ${timePart}`;
+  } catch {
+    return isoStr;
+  }
+}

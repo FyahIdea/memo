@@ -217,7 +217,7 @@ export const ObjectDetailModal: React.FC<ObjectDetailModalProps> = ({
               <Icon name="event" size="sm" /> Deadline
             </label>
             <input
-              type="date"
+              type="datetime-local"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               className={clsx(styles.metaInput, styles['metaInput--date'])}

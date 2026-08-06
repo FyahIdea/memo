@@ -141,6 +141,7 @@
   height: 2.75rem;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -237,7 +238,7 @@
   height: 1.8rem;
   border: none;
   border-radius: var(--radius-full);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-muted);
   cursor: pointer;
   transition: color var(--transition-fast);
@@ -249,7 +250,6 @@
 
 @media (hover: hover) {
   .filterCaret:hover {
-    background: transparent;
   }
 
   .filterCaret:hover span {
@@ -388,6 +388,39 @@
 }
 
 /* ─── Danh sách task ────────────────────────────────── */
+.taskListWrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollOverlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.scrollOverlay--on {
+  opacity: 1;
+}
+
+.scrollOverlayTop {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-surface), transparent);
+}
+
+.scrollOverlayBottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-surface), transparent);
+}
+
 .taskList {
   flex: 1;
   min-height: 0;
@@ -566,7 +599,7 @@
 .statusMenu {
   position: absolute;
   top: calc(100% + 0.4rem);
-  left: 0;
+  left: -1.2rem;
   z-index: 101;
   min-width: 10.5rem;
   display: flex;
@@ -574,7 +607,7 @@
   gap: 0.15rem;
   padding: var(--space-2);
   background: var(--color-surface);
-  border: 1.5px solid var(--color-border-soft);
+  border: 1.5px solid var(--color-neutral-border);
   border-radius: var(--radius-lg);
   animation: menuIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -663,6 +696,13 @@
   border-radius: 50%;
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+}
+
 /* Title: cùng size & weight với TaskItem, KHÔNG bị cắt dòng */
 .title {
   flex: 1;
@@ -679,7 +719,7 @@
 /* Cross-out: dùng Neutral Secondary (không đậm như trước) */
 .titleDone {
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
   color: var(--color-neutral-secondary);
 }
 
@@ -1054,4 +1094,19 @@
 /* Task gốc bị làm mờ khi đang kéo */
 .isDraggingSource {
   opacity: 0.35;
+}
+
+.rowFaded .box,
+.rowFaded .body,
+.rowFaded .badges {
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .rowFaded:hover .box,
+  .rowFaded:hover .body,
+  .rowFaded:hover .badges {
+    opacity: 1;
+  }
 }
