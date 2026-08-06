@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import styles from './Tooltip.module.css';
 
@@ -9,6 +9,7 @@ interface TooltipProps {
   textColor?: 'default' | 'blue' | 'red' | 'yellow' | 'green';
   className?: string;
   noPadding?: boolean;
+  delay?: number;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -18,16 +19,41 @@ export const Tooltip: React.FC<TooltipProps> = ({
   textColor = 'default',
   className,
   noPadding = false,
+  delay = 0,
 }) => {
   const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   if (!content) return <>{children}</>;
+
+  const handleMouseEnter = () => {
+    if (delay > 0) {
+      timerRef.current = setTimeout(() => {
+        setVisible(true);
+      }, delay);
+    } else {
+      setVisible(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    setVisible(false);
+  };
 
   return (
     <div
       className={clsx(styles.wrapper, className)}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {children}
       {visible && (

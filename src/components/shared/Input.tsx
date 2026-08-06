@@ -11,6 +11,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   leftIcon?: string;
   rightIcon?: string;
+  rightElement?: React.ReactNode;
   opticalAlign?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const InputField: React.FC<InputProps> = ({
   error,
   leftIcon,
   rightIcon,
+  rightElement,
   opticalAlign = false,
   id,
   className,
@@ -53,7 +55,7 @@ export const InputField: React.FC<InputProps> = ({
             styles.input,
             error && styles['input--error'],
             leftIcon && styles.hasLeftIcon,
-            rightIcon && styles.hasRightIcon,
+            (rightIcon || rightElement) && styles.hasRightIcon,
             className
           )}
           {...props}
@@ -62,6 +64,11 @@ export const InputField: React.FC<InputProps> = ({
           <span className={clsx(styles.icon, styles.iconRight)}>
             <Icon name={rightIcon} size="md" />
           </span>
+        )}
+        {rightElement && (
+          <div className={styles.rightElementWrapper}>
+            {rightElement}
+          </div>
         )}
       </div>
       {(helperText || error) && (

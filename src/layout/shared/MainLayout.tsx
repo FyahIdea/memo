@@ -8,6 +8,9 @@ import { TaskPoolPanel } from '../../components/tasks/TaskPoolPanel';
 import { QuickCaptureModal } from '../../pages/shared/QuickCaptureModal';
 import { ObjectDetailModal } from '../../pages/shared/ObjectDetailModal';
 import { useApp } from '../../contexts/AppContext';
+import { DndContext, DragOverlay, DragStartEvent, DragEndEvent, DragOverEvent, defaultDropAnimationSideEffects, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { PoolTaskRow } from '../../components/tasks/TaskPoolPanel';
+import { TaskObject } from '../../types';
 
 // Layout bọc toàn bộ app: sidebar + header + main content + footer + modals toàn cục
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -34,10 +37,66 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     handleUpdateObject,
     handleDeleteObject,
     handleResetData,
+    handleAddTaskToDay,
   } = useApp();
 
+  const [activeDragTask, setActiveDragTask] = useState<TaskObject | null>(null);
+  const [isDragOverValid, setIsDragOverValid] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setIsDragOverValid(false);
+    const { active } = event;
+    if (active.data.current?.type === 'Task') {
+      setActiveDragTask(active.data.current.task);
+    }
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || active.data.current?.type !== 'Task') {
+      setIsDragOverValid(false);
+      return;
+    }
+    
+    // Kiểm tra xem task đã có trong ngày này chưa
+    const task = active.data.current.task as TaskObject;
+    const dateStr = over.id as string;
+    const alreadyInDay = !!task.dayRelations?.[dateStr];
+    
+    setIsDragOverValid(!alreadyInDay);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.data.current?.type === 'Task') {
+      const taskId = active.data.current.task.id;
+      const dateStr = over.id as string;
+      handleAddTaskToDay(taskId, dateStr);
+    }
+    setActiveDragTask(null);
+  };
+
+  const dropAnimationConfig = {
+    duration: isDragOverValid ? 0 : 250,
+    easing: 'ease',
+  };
+
   return (
-    <div className={styles.app}>
+    <DndContext 
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className={styles.app}>
       {/* Sidebar điều hướng */}
       <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
@@ -175,7 +234,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         isOpen={isSidebarPanelOpen}
         onClose={() => setIsSidebarPanelOpen(false)}
         onAddTask={(title, cat, pts, pin) => handleAddTask(title, cat, pts, pin)}
-        onTogglePin={handleTogglePin}
         onSelectTask={setInspectedObject}
       />
 
@@ -198,7 +256,31 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         onUpdateObject={handleUpdateObject}
         onDelete={handleDeleteObject}
       />
+
+      {/* Drag Overlay cho hiệu ứng kéo thả mượt mà */}
+      <DragOverlay dropAnimation={dropAnimationConfig}>
+        {activeDragTask ? (
+          <div style={{ 
+            opacity: 1, 
+            transform: 'scale(1.05) rotate(3deg)', 
+            border: '1.5px solid var(--color-border)', 
+            borderRadius: 'var(--radius-md)', 
+            overflow: 'hidden',
+            backgroundColor: 'var(--color-surface)',
+            padding: '0.35rem'
+          }}>
+            <PoolTaskRow
+              task={activeDragTask}
+              todayStr={new Date().toISOString().split('T')[0]}
+              tagLookup={new Map()}
+              onStatusChange={() => {}}
+              isOverlay={true}
+            />
+          </div>
+        ) : null}
+      </DragOverlay>
     </div>
+    </DndContext>
   );
 };
 

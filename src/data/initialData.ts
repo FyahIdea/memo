@@ -83,6 +83,9 @@ export const INITIAL_TAGS: TagObject[] = [
   { id: 'tag-4', type: 'tag', name: 'reflection', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
   { id: 'tag-5', type: 'tag', name: 'design', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
   { id: 'tag-6', type: 'tag', name: 'finance', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
+  { id: 'tag-7', type: 'tag', name: 'data', color: 'bg-blue-100 text-blue-800', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
+  { id: 'tag-8', type: 'tag', name: 'DSCI101', color: 'bg-blue-100 text-blue-800', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
+  { id: 'tag-9', type: 'tag', name: 'uni', color: 'bg-blue-100 text-blue-800', createdAt: formatTimestamp(), updatedAt: formatTimestamp() },
 ];
 
 export function getInitialEvents(): EventObject[] {
@@ -185,6 +188,7 @@ export function getInitialTasks(): TaskObject[] {
       isPinned: false,
       points: 15,
       recurring: 'none',
+      tagIds: ['tag-7', 'tag-8', 'tag-9', 'tag-3'],
       deadline: tomorrow,
       dayRelations: {
         [tomorrow]: { status: 'todo', durationMinutes: 60 },

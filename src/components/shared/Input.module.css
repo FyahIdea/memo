@@ -111,3 +111,11 @@
 .helperError {
   color: var(--color-danger);
 }
+
+.rightElementWrapper {
+  position: absolute;
+  right: 0.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -12,6 +12,7 @@ import {
 } from '../../types';
 import { formatTimeOnly } from '../../utils/helpers';
 import { playTaskDone, playTaskUncheck, playPop, playDeleteSound } from '../../utils/sound';
+import { useDroppable } from '@dnd-kit/core';
 import styles from './DayCard.module.css';
 import { Icon } from '../shared/Icon';
 import { Badge } from '../shared/Badge';
@@ -56,7 +57,6 @@ export const DayCard: React.FC<DayCardProps> = ({
   onAddInlineTask,
   onSelectObject,
 }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
   const [showEventInput, setShowEventInput] = useState(false);
   const [eventTitle, setEventTitle] = useState('');
   const [eventTime, setEventTime] = useState('09:00 AM');
@@ -77,24 +77,9 @@ export const DayCard: React.FC<DayCardProps> = ({
   const dayNotes = notes.filter((n) => n.dayDateStr === dateStr);
 
   const doneTasksCount = dayTasks.filter((t) => t.dayRelations[dateStr]?.status === 'done').length;
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const taskId = e.dataTransfer.getData('application/memo-task-id');
-    if (taskId) {
-      onAddTaskToDay(taskId, dateStr);
-    }
-  };
+  const { setNodeRef, isOver } = useDroppable({
+    id: dateStr,
+  });
 
   const handleEventSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,14 +121,12 @@ export const DayCard: React.FC<DayCardProps> = ({
 
   return (
     <div
+      ref={setNodeRef}
       id={`day-card-${dateStr}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
       className={clsx(
         styles.card,
         isToday && styles['card--today'],
-        isDragOver && styles['card--dragOver']
+        isOver && styles['card--dragOver']
       )}
     >
       {/* Day Card Header Bar */}

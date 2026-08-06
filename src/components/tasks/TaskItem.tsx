@@ -161,12 +161,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       <Tooltip
         position="top"
         content={
-          <div style={{ padding: '0.25rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 700, color: 'var(--color-blue-primary)', marginBottom: '0.25rem' }}>
-              Kho điểm: 1,250 <Icon name="stars" size="sm" />
+          <div className={styles.pointsTooltipContainer}>
+            <div className={styles.pointsBonusRow}>
+              <span className={styles.pointsBonusLabel}>Task Reward</span>
+              <span className={styles.pointsBonusValue}>+{points}</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-              Hoàn thành task này để nhận thêm {points} điểm!
+            <div className={styles.pointsTotalRow}>
+              <span className={styles.pointsTotalLabel}>New Balance</span>
+              <div className={styles.pointsTotalValue}>
+                1,250 <Icon name="stars" size="sm" filled />
+              </div>
             </div>
           </div>
         }

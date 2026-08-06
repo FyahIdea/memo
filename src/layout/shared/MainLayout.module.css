@@ -4,7 +4,8 @@
 /* ─── App root wrapper ────────────────────────────────────── */
 .app {
   display: flex;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden; /* Khóa cuộn trang tổng, chỉ cuộn các vùng bên trong */
   background-color: var(--color-surface); /* Matches sidebar and header */
   color: var(--color-text-primary);
   font-family: var(--font-sans);

@@ -1,401 +1,893 @@
-import React, { useState, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import clsx from 'clsx';
-import styles from './TaskPoolPanel.module.css';
-import { TaskObject, TaskCategory } from '../../types';
-import { TaskItem } from './TaskItem';
-import { Icon } from '../shared/Icon';
-import { Badge } from '../shared/Badge';
-import { Button } from '../shared/Button';
-import { playPop } from '../../utils/sound';
-import { useApp } from '../../contexts/AppContext';
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
+import { createPortal } from "react-dom";
+import clsx from "clsx";
+import styles from "./TaskPoolPanel.module.css";
+import {
+  TaskObject,
+  TaskCategory,
+  TaskDayStatus,
+  TaskRecurring,
+  TaskDayConfig,
+} from "../../types";
+import { useDraggable } from "@dnd-kit/core";
+import { Icon } from "../shared/Icon";
+import { Button } from "../shared/Button";
+import { Tooltip } from "../shared/Tooltip";
+import { InputField } from "../shared/Input";
+import {
+  playPop,
+  playTaskDone,
+  playTaskUncheck,
+  playTaskInProgress,
+  playTaskCancelled,
+} from "../../utils/sound";
+import { useApp } from "../../contexts/AppContext";
 
-// ─── Kiểu filter cho danh sách task ──────────────────────────
-type FilterType = 'all' | TaskCategory;
+// ─── Kiểu filter ─────────────────────────────────────────────
+type FilterType = "all" | TaskCategory;
 
 interface TaskPoolPanelProps {
   tasks: TaskObject[];
   isOpen: boolean;
   onClose: () => void;
-  onAddTask: (title: string, category: TaskCategory, points: number, isPinned: boolean) => void;
+  // recurring là tham số THỨ 7 (optional) — cần nối dây ở TasksView + handleAddTask
+  // để lưu thật; nếu parent chưa dùng thì task vẫn tạo được nhưng recurring = 'none'.
+  onAddTask: (
+    title: string,
+    category: TaskCategory,
+    points: number,
+    isPinned: boolean,
+    deadline?: string,
+    rewardId?: string,
+    recurring?: TaskRecurring,
+  ) => void;
   onTogglePin: (taskId: string) => void;
   onSelectTask?: (task: TaskObject) => void;
 }
 
+// ─── Cấu hình từng loại task theo ĐÚNG ảnh thiết kế ──────────
+// Quick = VÀNG, Short-term = XANH LÁ, Long-term = ĐỎ
+const CATEGORY_META: Record<
+  TaskCategory,
+  {
+    label: string;
+    squareCls: string;
+    textCls: string;
+    pillActiveCls: string;
+    pillHoverCls: string;
+  }
+> = {
+  small: {
+    label: "Quick",
+    squareCls: styles.catQuick,
+    textCls: styles.catTextQuick,
+    pillActiveCls: styles["pill--quick"],
+    pillHoverCls: styles.pillHoverQuick,
+  },
+  short_term: {
+    label: "Short-term",
+    squareCls: styles.catShort,
+    textCls: styles.catTextShort,
+    pillActiveCls: styles["pill--short"],
+    pillHoverCls: styles.pillHoverShort,
+  },
+  long_term: {
+    label: "Long-term",
+    squareCls: styles.catLong,
+    textCls: styles.catTextLong,
+    pillActiveCls: styles["pill--long"],
+    pillHoverCls: styles.pillHoverLong,
+  },
+};
+
+// Thứ tự loại trong dropdown thêm task và trong hàng filter
+const CATEGORY_ORDER: TaskCategory[] = ["small", "short_term", "long_term"];
+
+function pointsForCategory(cat: TaskCategory): number {
+  return cat === "small" ? 5 : cat === "short_term" ? 20 : 50;
+}
+
+function formatDuration(min?: number): string | null {
+  if (!min || min <= 0) return null;
+  if (min < 60) return `${min}m`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m === 0 ? `${h}h` : `${h}h${m}m`;
+}
+
+function toConfettiType(
+  cat: TaskCategory,
+): "quick" | "short_term" | "long_term" {
+  return cat === "small" ? "quick" : cat;
+}
+
+// ─── Hook Long Press (giống TaskItem) ────────────────────────
+function useLongPress(callback: () => void, ms = 400) {
+  const [pressing, setPressing] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (pressing) timerRef.current = setTimeout(callback, ms);
+    else if (timerRef.current) clearTimeout(timerRef.current);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [callback, ms, pressing]);
+
+  return {
+    start: () => setPressing(true),
+    stop: () => setPressing(false),
+  };
+}
+
+// ─── Map trạng thái → icon + màu ô check (giống TaskItem) ────
+const CHECKBOX_MAP: Record<TaskDayStatus, { icon: string; cls: string }> = {
+  todo: { icon: "", cls: "" },
+  done: { icon: "check", cls: styles.boxDone },
+  in_progress: { icon: "schedule", cls: styles.boxInProgress },
+  cancelled: { icon: "close", cls: styles.boxCancelled },
+};
+
+// ═════════════════════════════════════════════════════════════
+// Một dòng task trong Task Pool
+// ═════════════════════════════════════════════════════════════
+export interface PoolTaskRowProps {
+  task: TaskObject;
+  todayStr: string;
+  tagLookup: Map<string, string>;
+  onStatusChange: (status: TaskDayStatus) => void;
+  onSelect?: () => void;
+  isOverlay?: boolean;
+}
+
+export const PoolTaskRow: React.FC<PoolTaskRowProps> = ({
+  task,
+  todayStr,
+  tagLookup,
+  onStatusChange,
+  onSelect,
+  isOverlay,
+}) => {
+  const [showMenu, setShowMenu] = useState(false);
+  // Cờ chặn cú click phát sinh ngay sau long-press (nguồn gốc bug mở modal)
+  const longPressedRef = useRef(false);
+
+  const status: TaskDayStatus = task.dayRelations[todayStr]?.status || "todo";
+  const isDone = status === "done";
+  const isCancelled = status === "cancelled";
+  const cat = CATEGORY_META[task.category];
+  const isRecurring = task.recurring !== "none";
+  const isSquareCheckbox =
+    task.category === "short_term" ||
+    task.category === "long_term" ||
+    (task.subItems && task.subItems.length > 0);
+  const cb = CHECKBOX_MAP[status];
+
+  const longPress = useLongPress(() => {
+    longPressedRef.current = true;
+    setShowMenu(true);
+  }, 400);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Nuốt cú click sinh ra ngay sau khi long-press mở menu
+    if (longPressedRef.current) {
+      longPressedRef.current = false;
+      return;
+    }
+    if (showMenu) return;
+    if (isDone) {
+      playTaskUncheck();
+      onStatusChange("todo");
+    } else {
+      import("../../utils/confetti").then((m) =>
+        m.triggerTaskConfetti(toConfettiType(task.category)),
+      );
+      playTaskDone();
+      onStatusChange("done");
+    }
+  };
+
+  const handlePickStatus = (e: React.MouseEvent, next: TaskDayStatus) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    if (next === status) return;
+    if (next === "done") {
+      import("../../utils/confetti").then((m) =>
+        m.triggerTaskConfetti(toConfettiType(task.category)),
+      );
+      playTaskDone();
+    } else if (next === "todo") playTaskUncheck();
+    else if (next === "in_progress") playTaskInProgress();
+    else if (next === "cancelled") playTaskCancelled();
+    onStatusChange(next);
+  };
+
+  // Thời lượng: ưu tiên hôm nay, nếu không lấy ngày đầu tiên có durationMinutes
+  const relations = Object.values(task.dayRelations) as TaskDayConfig[];
+  const durationMin =
+    task.dayRelations[todayStr]?.durationMinutes ??
+    relations.find((r) => r.durationMinutes)?.durationMinutes;
+  const durationText = formatDuration(durationMin);
+
+  const linkedDays = Object.keys(task.dayRelations).length;
+
+  // Tag: map id → tên
+  const tagNames = (task.tagIds || [])
+    .map((id) => tagLookup.get(id))
+    .filter((n): n is string => !!n);
+  const shownTags = tagNames.slice(0, 4);
+  const extraTags = tagNames.length - shownTags.length;
+
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `pool-task-${task.id}`,
+    data: {
+      type: 'Task',
+      task: task,
+    },
+    disabled: isOverlay,
+  });
+
+  return (
+    <div
+      ref={isOverlay ? undefined : setNodeRef}
+      className={clsx(
+        styles.row,
+        isDragging && styles["row--dragging"],
+        isOverlay && styles["row--overlay"]
+      )}
+      onClick={() => {
+        if (!showMenu) onSelect?.();
+      }}
+      {...(isOverlay ? {} : attributes)}
+      {...(isOverlay ? {} : listeners)}
+    >
+      {/* Tay nắm kéo */}
+      <div className={styles.dragHandle}>
+        <Icon name="drag_indicator" size="sm" className={styles.dragIcon} />
+      </div>
+
+      {/* Ô check — hoặc icon repeat nếu là task lặp lại (habit) */}
+      {isRecurring ? (
+        <Tooltip
+          content="Task lặp lại"
+          position="right"
+        >
+          <div className={styles.recurringMark}>
+            <Icon name="sync" size="md" filled />
+          </div>
+        </Tooltip>
+      ) : (
+        <div
+          className={styles.checkboxArea}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseUp={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className={clsx(styles.checkbox, cb.cls, isSquareCheckbox && styles.checkboxSquare)}
+            onClick={handleToggle}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              longPress.start();
+            }}
+            onMouseUp={(e) => {
+              e.stopPropagation();
+              longPress.stop();
+            }}
+            onMouseLeave={() => longPress.stop()}
+            onTouchStart={() => longPress.start()}
+            onTouchEnd={() => longPress.stop()}
+            aria-label="Đổi trạng thái"
+          >
+            {cb.icon && (
+              <Icon
+                name={cb.icon}
+                size="sm"
+                filled
+                className={styles.checkIcon}
+              />
+            )}
+          </button>
+
+          {showMenu && (
+            <>
+              <div
+                className={styles.menuBackdrop}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(false);
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onMouseUp={(e) => e.stopPropagation()}
+              />
+              <div
+                className={styles.statusMenu}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className={clsx(styles.menuItem, styles.menuDone)}
+                  onClick={(e) => handlePickStatus(e, "done")}
+                >
+                  <Icon name="check_circle" filled size="md" />
+                  <span>Hoàn thành</span>
+                </button>
+                <button
+                  className={clsx(styles.menuItem, styles.menuInProgress)}
+                  onClick={(e) => handlePickStatus(e, "in_progress")}
+                >
+                  <Icon name="schedule" filled size="md" />
+                  <span>Đang làm</span>
+                </button>
+                <button
+                  className={clsx(styles.menuItem, styles.menuCancelled)}
+                  onClick={(e) => handlePickStatus(e, "cancelled")}
+                >
+                  <Icon name="cancel" filled size="md" />
+                  <span>Huỷ bỏ</span>
+                </button>
+                <div className={styles.menuDivider} />
+                <button
+                  className={clsx(styles.menuItem, styles.menuTodo)}
+                  onClick={(e) => handlePickStatus(e, "todo")}
+                >
+                  <Icon name="radio_button_unchecked" filled size="md" />
+                  <span>Đặt lại</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Nội dung */}
+      <div className={styles.body}>
+        <div
+          className={clsx(
+            styles.title,
+            (isDone || isCancelled) && styles.titleDone,
+          )}
+        >
+          {/* Ô vuông nhỏ chỉ loại task nằm inline ngay trong title */}
+          <Tooltip content={`${cat.label} task`} position="top">
+            <span className={clsx(styles.catSquare, cat.squareCls)} />
+          </Tooltip>
+          {task.title}
+        </div>
+
+        {(durationText || task.deadline) && (
+          <div className={styles.metaRow}>
+            {task.deadline && (
+              <span className={styles.metaItem}>
+                <Icon name="flag" size="sm" filled className={styles.metaIcon} />
+                {task.deadline}
+              </span>
+            )}
+            {durationText && (
+              <span className={styles.metaItem}>
+                <Icon name="schedule" size="sm" filled className={styles.metaIcon} />
+                {durationText}
+              </span>
+            )}
+          </div>
+        )}
+
+        {shownTags.length > 0 && (
+          <div className={styles.tagRow}>
+            {shownTags.map((name, i) => (
+              <span key={i} className={styles.tag}>
+                #{name}
+              </span>
+            ))}
+            {extraTags > 0 && (
+              <span className={styles.tagMore}>+{extraTags}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Cột phải: điểm + số ngày + ghim */}
+      <div className={styles.badges}>
+        {task.points !== undefined && (
+          <div className={clsx(styles.badge, styles.badgePoints)}>
+            <Icon name="stars" size="sm" filled />
+            <span>{task.points}</span>
+          </div>
+        )}
+        <Tooltip content={`Đang gắn vào ${linkedDays} ngày`} position="left">
+          <div className={clsx(styles.badge, styles.badgeDays)}>
+            <Icon name="calendar_today" size="sm" />
+            <span>{linkedDays}</span>
+          </div>
+        </Tooltip>
+      </div>
+    </div>
+  );
+};
+
+// ═════════════════════════════════════════════════════════════
+// Task Pool Panel
+// ═════════════════════════════════════════════════════════════
 export const TaskPoolPanel: React.FC<TaskPoolPanelProps> = ({
   tasks,
   isOpen,
   onClose,
   onAddTask,
-  onTogglePin,
   onSelectTask,
 }) => {
-  const { handleUpdateTaskStatus, todayStr } = useApp();
-  
-  // ─── State nội bộ ─────────────────────────────────────────
-  const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState<TaskCategory>('short_term');
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // ─── State cho Custom Drag Layer ────────────────────────
+  const { appState, handleUpdateTaskStatus, todayStr } = useApp();
+
+  // ─── State lọc ────────────────────────────────────────────
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [recurringOnly, setRecurringOnly] = useState(false);
+
+  // ─── State form thêm task ─────────────────────────────────
+  const [newTitle, setNewTitle] = useState("");
+  const [newCategory, setNewCategory] = useState<TaskCategory>("small");
+  const [newRecurring, setNewRecurring] = useState(false);
+  const [catMenuOpen, setCatMenuOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [newTitle]);
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewTitle(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (newTitle.trim()) {
+        handleAddSubmit(e as unknown as React.FormEvent);
+      }
+    }
+  };
+
+  // ─── State custom drag layer ──────────────────────────────
   const [draggingTask, setDraggingTask] = useState<TaskObject | null>(null);
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  // ─── Lọc và phân nhóm task ────────────────────────────────
+  // ─── State cuộn hàng filter ───────────────────────────────
+  const filterScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Map id → tên tag (lấy từ AppContext)
+  const tagLookup = useMemo(() => {
+    const m = new Map<string, string>();
+    (appState.tags || []).forEach((t) => m.set(t.id, t.name));
+    return m;
+  }, [appState.tags]);
+
+  // ─── Lọc task ─────────────────────────────────────────────
   const filteredTasks = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return tasks.filter((t) => {
-      const matchCategory = filter === 'all' || t.category === filter;
+      const matchCat = filter === "all" || t.category === filter;
+      const matchRecurring = !recurringOnly || t.recurring !== "none";
+      const tagNames = (t.tagIds || []).map((id) =>
+        (tagLookup.get(id) || "").toLowerCase(),
+      );
       const matchSearch =
-        searchQuery.trim() === '' ||
-        t.title.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCategory && matchSearch;
+        q === "" ||
+        t.title.toLowerCase().includes(q) ||
+        tagNames.some((n) => n.includes(q));
+      return matchCat && matchRecurring && matchSearch;
     });
-  }, [tasks, filter, searchQuery]);
+  }, [tasks, filter, recurringOnly, searchQuery, tagLookup]);
 
-  const pinnedTasks = useMemo(
-    () => filteredTasks.filter((t) => t.isPinned),
-    [filteredTasks]
-  );
-  const regularTasks = useMemo(
-    () => filteredTasks.filter((t) => !t.isPinned),
-    [filteredTasks]
-  );
+  // Đếm số lượng cho từng filter pill
+  const counts = useMemo(() => {
+    const c: Record<FilterType, number> = {
+      all: tasks.length,
+      small: 0,
+      short_term: 0,
+      long_term: 0,
+    };
+    tasks.forEach((t) => {
+      c[t.category] += 1;
+    });
+    return c;
+  }, [tasks]);
 
+  // ─── Custom drag layer ────────────────────────────────────
   const handleDragStart = (e: React.DragEvent, task: TaskObject) => {
-    e.dataTransfer.setData('application/memo-task-id', task.id);
-    e.dataTransfer.effectAllowed = 'copyMove';
-    
-    // 1. Dùng ảnh trong suốt làm Ghost mặc định của hệ thống
-    // Điều này sẽ xóa bỏ mọi bóng mờ (box-shadow) mặc định do OS sinh ra
+    e.dataTransfer.setData("application/memo-task-id", task.id);
+    e.dataTransfer.effectAllowed = "copyMove";
     const img = new Image();
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    img.src =
+      "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     e.dataTransfer.setDragImage(img, 0, 0);
-    
-    // 2. Kích hoạt custom drag layer
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    
     setDraggingTask(task);
     setDragPos({ x: e.clientX, y: e.clientY });
-    setDragOffset({ x: offsetX, y: offsetY });
-    
-    // 3. Làm mờ task gốc bên trong danh sách
+    setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     const target = e.currentTarget as HTMLElement;
-    setTimeout(() => {
-      target.classList.add(styles.isDraggingSource);
-    }, 0);
+    setTimeout(() => target.classList.add(styles.isDraggingSource), 0);
   };
 
   const handleDrag = (e: React.DragEvent) => {
-    // Khi thả chuột, sự kiện cuối cùng thường bắn ra tọa độ 0, 0 nên bỏ qua
     if (e.clientX === 0 && e.clientY === 0) return;
     setDragPos({ x: e.clientX, y: e.clientY });
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
     setDraggingTask(null);
-    const target = e.currentTarget as HTMLElement;
-    target.classList.remove(styles.isDraggingSource);
+    (e.currentTarget as HTMLElement).classList.remove(styles.isDraggingSource);
   };
 
-  // ─── Thêm task mới từ form nhanh ─────────────────────────
+  // ─── Trạng thái cuộn của hàng filter ──────────────────────
+  const updateScrollState = useCallback(() => {
+    const el = filterScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+    window.addEventListener("resize", updateScrollState);
+    return () => window.removeEventListener("resize", updateScrollState);
+  }, [updateScrollState, tasks.length, filter]);
+
+  const scrollFilters = (dir: number) => {
+    filterScrollRef.current?.scrollBy({ left: dir * 140, behavior: "smooth" });
+  };
+
+  // ─── Thêm task ────────────────────────────────────────────
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    const points =
-      newCategory === 'small' ? 5 : newCategory === 'short_term' ? 20 : 50;
-    onAddTask(newTitle.trim(), newCategory, points, false);
-    setNewTitle('');
+    onAddTask(
+      newTitle.trim(),
+      newCategory,
+      pointsForCategory(newCategory),
+      false,
+      undefined,
+      undefined,
+      newRecurring ? "daily" : "none",
+    );
+    setNewTitle("");
+    setNewRecurring(false);
+    setNewCategory("small");
     playPop();
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
-  // ─── Map category → label hiển thị và Badge variant ──────
-  const categoryConfig: Record<
-    TaskCategory,
-    { label: string; variant: 'warning' | 'primary' | 'success' }
-  > = {
-    small: { label: 'Lặt vặt', variant: 'success' },
-    short_term: { label: 'Ngắn hạn', variant: 'warning' },
-    long_term: { label: 'Dài hạn', variant: 'primary' },
-  };
-
-  // ─── Các filter pill ──────────────────────────────────────
-  const filterOptions: { key: FilterType; label: string; count: number }[] = [
-    { key: 'all', label: 'Tất cả', count: tasks.length },
-    {
-      key: 'short_term',
-      label: 'Ngắn hạn',
-      count: tasks.filter((t) => t.category === 'short_term').length,
-    },
-    {
-      key: 'small',
-      label: 'Lặt vặt',
-      count: tasks.filter((t) => t.category === 'small').length,
-    },
-    {
-      key: 'long_term',
-      label: 'Dài hạn',
-      count: tasks.filter((t) => t.category === 'long_term').length,
-    },
-  ];
+  const isFiltering =
+    searchQuery.trim() !== "" || recurringOnly || filter !== "all";
 
   return (
     <aside
-      className={clsx(styles.panel, isOpen && styles['panel--open'])}
+      className={clsx(styles.panel, isOpen && styles["panel--open"])}
       aria-hidden={!isOpen}
     >
-      {/* ─── Header ──────────────────────────────────────────── */}
+      {/* ─── Header ─────────────────────────────────────────── */}
       <div className={styles.header}>
         <div className={styles.headerTitle}>
-          <Icon name="inventory_2" size="md" filled className={styles.headerIcon} />
-          <span>Kho Task</span>
-          <Badge variant="default" size="sm">{tasks.length}</Badge>
+          <Icon name="inventory_2" size="md" filled />
+          <span>Task Pool</span>
         </div>
-        <button
-          className={styles.closeBtn}
-          onClick={onClose}
-          aria-label="Đóng kho task"
-        >
-          <Icon name="close" size="md" className={styles.closeIcon} />
-        </button>
+        <Tooltip content="Thu gọn" position="left">
+          <button
+            className={styles.collapseBtn}
+            onClick={onClose}
+            aria-label="Thu gọn Task Pool"
+          >
+            <Icon name="right_panel_open" size="md" />
+          </button>
+        </Tooltip>
       </div>
 
-
-
-      {/* ─── Thanh tìm kiếm ──────────────────────────────────── */}
-      <div className={styles.searchContainer}>
-        <div className={styles.searchBar}>
-          <Icon name="search" size="md" className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Tìm task..."
+      {/* ─── Thanh tìm kiếm + lọc lặp lại ───────────────────── */}
+      <div className={styles.searchRow}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <InputField
+            leftIcon="search"
+            placeholder="Task name or tags"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            rightElement={
+              searchQuery ? (
+                <button
+                  className={styles.searchClear}
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Xoá tìm kiếm"
+                >
+                  <Icon name="close" size="sm" />
+                </button>
+              ) : undefined
+            }
           />
-          {searchQuery && (
-            <button
-              className={styles.searchClear}
-              onClick={() => setSearchQuery('')}
-              aria-label="Xoá tìm kiếm"
-            >
-              <Icon name="close" size="sm" />
-            </button>
-          )}
         </div>
-      </div>
-
-      {/* ─── Filter pills ─────────────────────────────────────── */}
-      <div className={styles.filters}>
-        {filterOptions.map((opt) => (
+        <Tooltip content="Chỉ hiện task lặp lại" position="left" delay={800}>
           <button
-            key={opt.key}
             className={clsx(
-              styles.filterPill,
-              filter === opt.key && styles['filterPill--active']
+              styles.iconToggle,
+              recurringOnly && styles["iconToggle--active"],
             )}
-            onClick={() => setFilter(opt.key)}
+            onClick={() => {
+              playPop();
+              setRecurringOnly((v) => !v);
+            }}
+            aria-pressed={recurringOnly}
           >
-            {opt.label}
-            <span className={styles.filterCount}>{opt.count}</span>
+            <Icon name="autorenew" size="md" />
           </button>
-        ))}
+        </Tooltip>
       </div>
 
-      {/* ─── Danh sách task (scrollable) ─────────────────────── */}
-      <div className={styles.taskList}>
-
-        {/* Nhóm: Task ghim (Pinned) */}
-        {pinnedTasks.length > 0 && (
-          <div className={styles.taskGroup}>
-            <div className={clsx(styles.sectionLabel, styles['sectionLabel--pinned'])}>
-              <Icon name="push_pin" size="sm" filled />
-              <span>Đang ghim</span>
-              <span className={styles.sectionCount}>{pinnedTasks.length}</span>
-            </div>
-            {pinnedTasks.map((task) => (
-              <React.Fragment key={task.id}>
-                <div
-                  className={clsx(styles.taskWrapper, styles['taskWrapper--pinned'])}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, task)}
-                  onDrag={handleDrag}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => onSelectTask?.(task)}
-                >
-                  <div className={styles.dragHandle}>
-                    <Icon name="drag_indicator" size="sm" className={styles.dragIcon} />
-                  </div>
-                  
-                  <div className={styles.taskItemWrap}>
-                    <TaskItem
-                      id={task.id}
-                      title={task.title}
-                      status={task.dayRelations[todayStr]?.status || 'todo'}
-                      onStatusChange={(newStatus) => handleUpdateTaskStatus(task.id, todayStr, newStatus)}
-                      taskType={task.category === 'small' ? 'quick' : task.category === 'short_term' ? 'short_term' : 'long_term'}
-                      points={task.points}
-                      notes={task.description}
-                      deadline={task.deadline}
-                      reward={task.rewardId}
-                      className={styles.poolTaskItem}
-                      disabled={false}
-                      variant="pool"
-                    />
-                  </div>
-                </div>
-                <div className={styles.taskDivider} />
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-
-        {/* Nhóm: Task thường */}
-        <div className={styles.taskGroup}>
-          {pinnedTasks.length > 0 && (
-            <div className={styles.sectionLabel}>
-              <Icon name="list_alt" size="sm" filled />
-              <span>Task pool</span>
-              <span className={styles.sectionCount}>{regularTasks.length}</span>
-            </div>
-          )}
-
-          {regularTasks.length === 0 && pinnedTasks.length === 0 ? (
-            /* Empty state khi không có task nào */
-            <div className={styles.emptyState}>
-              <Icon name="inventory_2" size="xl" className={styles.emptyIcon} />
-              <p className={styles.emptyTitle}>Kho trống</p>
-              <p className={styles.emptyDesc}>
-                {searchQuery
-                  ? 'Không tìm thấy task phù hợp.'
-                  : 'Thêm task mới bên dưới để bắt đầu.'}
-              </p>
-            </div>
-          ) : regularTasks.length === 0 ? (
-            /* Empty state chỉ khi nhóm regular trống */
-            null
-          ) : (
-            regularTasks.map((task) => (
-              <React.Fragment key={task.id}>
-                <div
-                  className={styles.taskWrapper}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, task)}
-                  onDrag={handleDrag}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => onSelectTask?.(task)}
-                >
-                  <div className={styles.dragHandle}>
-                    <Icon name="drag_indicator" size="sm" className={styles.dragIcon} />
-                  </div>
-
-                  <div className={styles.taskItemWrap}>
-                    <TaskItem
-                      id={task.id}
-                      title={task.title}
-                      status={task.dayRelations[todayStr]?.status || 'todo'}
-                      onStatusChange={(newStatus) => handleUpdateTaskStatus(task.id, todayStr, newStatus)}
-                      taskType={task.category === 'small' ? 'quick' : task.category === 'short_term' ? 'short_term' : 'long_term'}
-                      points={task.points}
-                      notes={task.description}
-                      deadline={task.deadline}
-                      reward={task.rewardId}
-                      className={styles.poolTaskItem}
-                      disabled={false}
-                      variant="pool"
-                    />
-                  </div>
-                </div>
-                <div className={styles.taskDivider} />
-              </React.Fragment>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* ─── Form thêm task nhanh (footer) ───────────────────── */}
-      <div className={styles.addFormWrapper}>
-        <form onSubmit={handleAddSubmit} className={styles.addForm}>
-          <input
-            type="text"
-            className={styles.addInput}
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Thêm task mới..."
-          />
-
-          {/* Select loại task */}
-          <select
-            className={styles.addSelect}
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value as TaskCategory)}
-            aria-label="Loại task"
+      {/* ─── Filter pills (một hàng, cuộn ngang) ────────────── */}
+      <div className={styles.filtersWrap}>
+        {canScrollLeft && (
+          <button
+            className={clsx(styles.filterCaret, styles.filterCaretLeft)}
+            onClick={() => scrollFilters(-1)}
+            aria-label="Cuộn trái"
           >
-            <option value="short_term">Ngắn hạn</option>
-            <option value="small">Lặt vặt</option>
-            <option value="long_term">Dài hạn</option>
-          </select>
+            <Icon name="chevron_left" size="sm" />
+          </button>
+        )}
+        <div
+          className={clsx(
+            styles.filterFade,
+            styles.filterFadeLeft,
+            canScrollLeft && styles["filterFade--on"],
+          )}
+        />
 
-          {/* Nút submit */}
-          <Button
-            color="blue"
-            variant="primary"
-            size="sm"
-            icon="add"
-            iconOnly
-            type="submit"
-            disabled={!newTitle.trim()}
-            aria-label="Thêm task"
-          />
+        <div
+          className={styles.filtersScroll}
+          ref={filterScrollRef}
+          onScroll={updateScrollState}
+        >
+          <button
+            className={clsx(
+              styles.pill,
+              styles.pillHoverAll,
+              filter === "all" && styles["pill--activeAll"],
+            )}
+            onClick={() => setFilter("all")}
+          >
+            <span className={styles.pillLabel}>All</span>
+            <span className={styles.pillCount}>({counts.all})</span>
+          </button>
+
+          {CATEGORY_ORDER.map((cat) => {
+            const meta = CATEGORY_META[cat];
+            const active = filter === cat;
+            return (
+              <button
+                key={cat}
+                className={clsx(
+                  styles.pill,
+                  meta.pillHoverCls,
+                  active && styles["pill--active"],
+                  active && meta.pillActiveCls,
+                )}
+                onClick={() => setFilter(cat)}
+              >
+                <span className={clsx(styles.pillSquare, meta.squareCls)} />
+                <span className={styles.pillLabel}>{meta.label}</span>
+                <span className={styles.pillCount}>({counts[cat]})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className={clsx(
+            styles.filterFade,
+            styles.filterFadeRight,
+            canScrollRight && styles["filterFade--on"],
+          )}
+        />
+        {canScrollRight && (
+          <button
+            className={clsx(styles.filterCaret, styles.filterCaretRight)}
+            onClick={() => scrollFilters(1)}
+            aria-label="Cuộn phải"
+          >
+            <Icon name="chevron_right" size="sm" />
+          </button>
+        )}
+      </div>
+
+      {/* ─── Danh sách task ─────────────────────────────────── */}
+      <div className={styles.taskList}>
+        {filteredTasks.length === 0 ? (
+          <div className={styles.emptyState}>
+            <Icon name="inventory_2" size="xl" className={styles.emptyIcon} />
+            <p className={styles.emptyTitle}>Không có task</p>
+            <p className={styles.emptyDesc}>
+              {isFiltering
+                ? "Không tìm thấy task phù hợp."
+                : "Thêm task mới bên dưới để bắt đầu."}
+            </p>
+          </div>
+        ) : (
+          filteredTasks.map((task) => (
+            <PoolTaskRow
+              key={task.id}
+              task={task}
+              todayStr={todayStr}
+              tagLookup={tagLookup}
+              onStatusChange={(s) =>
+                handleUpdateTaskStatus(task.id, todayStr, s)
+              }
+              onSelect={() => onSelectTask?.(task)}
+            />
+          ))
+        )}
+      </div>
+
+      {/* ─── Form thêm task (footer) ────────────────────────── */}
+      <div className={styles.addFormWrap}>
+        <form className={styles.addForm} onSubmit={handleAddSubmit}>
+          <div className={styles.addInputWrap}>
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              className={styles.addInput}
+              value={newTitle}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Thêm task mới"
+            />
+
+            <div className={styles.addToolsRow}>
+              <div className={styles.addToolsLeft}>
+                {/* Dropdown chọn loại task */}
+                <div className={styles.addCatWrap}>
+                  <button
+                    type="button"
+                    className={styles.addCatBtn}
+                    onClick={() => setCatMenuOpen((v) => !v)}
+                    aria-label="Chọn loại task"
+                  >
+                    <span
+                      className={clsx(
+                        styles.addCatSquare,
+                        CATEGORY_META[newCategory].squareCls,
+                      )}
+                    />
+                    <Icon
+                      name="arrow_drop_down"
+                      size="sm"
+                      className={clsx(
+                        styles.addCatCaret,
+                        catMenuOpen && styles.addCatCaretOpen,
+                      )}
+                    />
+                  </button>
+
+                  {catMenuOpen && (
+                    <>
+                      <div
+                        className={styles.menuBackdrop}
+                        onClick={() => setCatMenuOpen(false)}
+                      />
+                      <div className={styles.addCatMenu}>
+                        {CATEGORY_ORDER.map((cat) => {
+                          const meta = CATEGORY_META[cat];
+                          const active = newCategory === cat;
+                          return (
+                            <button
+                              type="button"
+                              key={cat}
+                              className={clsx(
+                                styles.addCatOption,
+                                active && styles["addCatOption--active"],
+                              )}
+                              onClick={() => {
+                                setNewCategory(cat);
+                                setCatMenuOpen(false);
+                              }}
+                            >
+                              <span
+                                className={clsx(styles.addCatSquare, meta.squareCls)}
+                              />
+                              <span
+                                className={clsx(styles.addCatLabel, active && styles.addCatLabelActive)}
+                              >
+                                {meta.label}
+                              </span>
+                              {active && (
+                                <Icon
+                                  name="check"
+                                  size="sm"
+                                  className={styles.addCatCheck}
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.addToolsRight}>
+                {/* Nút repeat */}
+                <Tooltip content="Task lặp lại" position="top">
+                  <button
+                    type="button"
+                    className={clsx(
+                      styles.addRepeatBtn,
+                      newRecurring && styles["addRepeatBtn--active"],
+                    )}
+                    onClick={() => setNewRecurring((v) => !v)}
+                    aria-pressed={newRecurring}
+                  >
+                    <Icon name="autorenew" size="md" />
+                  </button>
+                </Tooltip>
+
+                <Button
+                  color="blue"
+                  variant="primary"
+                  size="sm"
+                  icon="arrow_upward"
+                  iconOnly
+                  type="submit"
+                  disabled={!newTitle.trim()}
+                  aria-label="Thêm task"
+                  className={styles.addSubmitBtn}
+                />
+              </div>
+            </div>
+          </div>
         </form>
       </div>
 
-      {/* ─── Custom Drag Layer ────────────────────────────────── */}
-      {draggingTask && document.body && createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            transform: `translate(${dragPos.x - dragOffset.x}px, ${dragPos.y - dragOffset.y}px) rotate(3deg)`,
-            transformOrigin: `${dragOffset.x}px ${dragOffset.y}px`, // Xoay quanh đúng điểm nắm
-            pointerEvents: 'none',
-            zIndex: 99999,
-            width: '300px', // Chiều rộng cố định cho đẹp
-            backgroundColor: 'var(--color-surface, #ffffff)',
-            border: '1px solid var(--color-neutral-border)',
-            borderRadius: 'var(--radius-xl)',
-            boxShadow: 'none', // Không đổ bóng như bạn muốn
-            display: 'flex',
-            alignItems: 'flex-start',
-            padding: 0
-          }}
-        >
-          <div className={styles.dragHandle} style={{ paddingTop: '0.875rem' }}>
-            <Icon name="drag_indicator" size="sm" className={styles.dragIcon} />
-          </div>
-          
-          <div className={styles.taskItemWrap}>
-            <TaskItem
-              id={draggingTask.id}
-              title={draggingTask.title}
-              status={draggingTask.dayRelations[todayStr]?.status || 'todo'}
-              taskType={draggingTask.category === 'small' ? 'quick' : draggingTask.category === 'short_term' ? 'short_term' : 'long_term'}
-              points={draggingTask.points}
-              notes={draggingTask.description}
-              deadline={draggingTask.deadline}
-              reward={draggingTask.rewardId}
-              className={styles.poolTaskItem}
-              disabled={false}
-              variant="pool"
+      {/* ─── Custom Drag Layer ──────────────────────────────── */}
+      {draggingTask &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className={styles.dragLayer}
+            style={{
+              transform: `translate(${dragPos.x - dragOffset.x}px, ${dragPos.y - dragOffset.y
+                }px) rotate(2deg)`,
+              transformOrigin: `${dragOffset.x}px ${dragOffset.y}px`,
+            }}
+          >
+            <div className={styles.dragHandle}>
+              <Icon
+                name="drag_indicator"
+                size="sm"
+                className={styles.dragIcon}
+              />
+            </div>
+            <span
+              className={clsx(
+                styles.catSquare,
+                CATEGORY_META[draggingTask.category].squareCls,
+              )}
             />
-          </div>
-        </div>,
-        document.body
-      )}
+            <span className={styles.dragTitle}>{draggingTask.title}</span>
+          </div>,
+          document.body,
+        )}
     </aside>
   );
 };
